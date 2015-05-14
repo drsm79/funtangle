@@ -1,0 +1,17 @@
+{
+  "name": "funtangle",
+  "version": "0.0.0",
+  "description": "fun with midi",
+  "main": "launchpad.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Simon Metson",
+  "license": "Apache 2",
+  "dependencies": {
+    "midi": "^0.9.3",
+    "midi-clock": "0.0.1",
+    "midi-launchpad": "^1.0.3",
+    "note-player-stream": "^1.0.2"
+  }
+}

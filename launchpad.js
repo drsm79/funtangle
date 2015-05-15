@@ -13,23 +13,31 @@ _(output.getPortCount()).times(function(n){
 
 var prompt = require('prompt');
 
-prompt.get(['launchpad', {name: 'synth1', required: false}, {name: 'synth2', required: false}, {name: 'synth3', required: false}, {name: 'synth4', required: false}], function (err, result) {
+prompt.get(
+    _.first([
+        'launchpad',
+        {name: 'synth1', required: false},
+        {name: 'synth2', required: false},
+        {name: 'synth3', required: false},
+        {name: 'synth4', required: false},
+        {name: 'synth5', required: false}
+    ], output.getPortCount()),
+function (err, result) {
     // https://github.com/sydlawrence/node-midi-launchpad
-    console.log(typeof(result.launchpad));
     var launchpad = require('midi-launchpad').connect(parseInt(result.launchpad));
 
     var play = launchpad.getButton(8,0);
-    var pause = launchpad.getButton(8,  1);
-    var stop = launchpad.getButton(8,2);
+    var stop = launchpad.getButton(8,1);
     var tempoup = launchpad.getButton(8,4);
     var tempodown = launchpad.getButton(8,5);
     var shift = launchpad.getButton(8,7);
     var bank = launchpad.getButton(8,3);
+    var ticks = cycle(_.range(8));
+    var t = 0;
 
     function initcontrols() {
         launchpad.clear();
         play.light(launchpad.colors.green.high);
-        pause.light(launchpad.colors.orange.medium);
         stop.light(launchpad.colors.red.medium);
         shift.light(launchpad.colors.yellow.medium);
         tempoup.light(launchpad.colors.green.low);
@@ -43,32 +51,24 @@ prompt.get(['launchpad', {name: 'synth1', required: false}, {name: 'synth2', req
 
 
     play.on("press", function(button) {
-        clock.start();
-        console.log(tempo);
-        play.light(launchpad.colors.green.low);
-        pause.light(launchpad.colors.orange.medium);
+        if (play.getState() == launchpad.colors.orange.high){
+            // Stop the clock without reseting the tick
+            clock.stop();
+            play.light(launchpad.colors.green.high);
+        } else {
+            clock.start();
+            console.log(tempo);
+            play.light(launchpad.colors.orange.high);
+        }
         stop.light(launchpad.colors.red.medium);
-    });
-
-    pause.on("press", function(button) {
-        // Stop the clock without reseting the tick
-        clock.stop();
-        play.light(launchpad.colors.green.high);
-        pause.light(launchpad.colors.orange.low);
-        stop.light(launchpad.colors.red.high);
     });
 
     stop.on("press", function(button) {
         // Stop the clock, reset the tick
         clock.stop();
-        if (t > 0){
-            launchpad.getButton(t - 1, 8).light(0);
-        } else {
-            launchpad.getButton(7, 8).light(0);
-        }
-        t = 0;
+        _(8).times(function(n){darktick(launchpad.getButton(n, 8)); });
+        ticks = cycle(_.range(8));
         play.light(launchpad.colors.green.high);
-        pause.light(launchpad.colors.orange.medium);
         stop.light(launchpad.colors.red.medium);
     });
 
@@ -112,7 +112,7 @@ prompt.get(['launchpad', {name: 'synth1', required: false}, {name: 'synth2', req
         } else if (state == launchpad.colors.yellow.medium){
             button.light(launchpad.colors.yellow.high);
         } else {
-            button.light(1);
+            button.light(launchpad.colors.red.high);
         }
     }
 
@@ -122,9 +122,10 @@ prompt.get(['launchpad', {name: 'synth1', required: false}, {name: 'synth2', req
             button.light(launchpad.colors.green.medium);
         } else if (state == launchpad.colors.yellow.high){
             button.light(launchpad.colors.yellow.medium);
-        } else {
+        } else if (state == launchpad.colors.red.high){
             button.light(0);
         }
+        // there's a no op for green/yellow medium for accents/glides
     }
 
     function accent (button) {
@@ -154,13 +155,13 @@ prompt.get(['launchpad', {name: 'synth1', required: false}, {name: 'synth2', req
     clock.on('position', function(position){
       var microPosition = position % 24;
       if (microPosition === 0){
+        t = ticks.next();
         lighttick(launchpad.getButton(t, 8));
         if (t > 0){
             darktick(launchpad.getButton(t - 1, 8));
         } else {
             darktick(launchpad.getButton(7, 8));
         }
-        if (t < 7){t += 1} else {t = 0};
       }
     });
 });

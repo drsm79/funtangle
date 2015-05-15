@@ -164,7 +164,7 @@ launchpad.on("press", function(button) {
             glide(button);
         }
     } else if (button.x != 8) {
-        button.light(launchpad.randomColor());
+        button.light(bank.getState());
     }
 });
 

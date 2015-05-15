@@ -5,9 +5,14 @@ var launchpad = require('midi-launchpad').connect(0);
 var MidiClock = require('midi-clock');
 var clock = MidiClock();
 // https://github.com/justinlatimer/node-midi
+var midi = require('midi');
+var output = new midi.output();
+output.openPort(1, "funtangle");
 // https://www.npmjs.com/package/midi-looper
 // https://www.npmjs.com/package/midi-looper-launchpad
-pause
+// https://github.com/saebekassebil/teoria
+var teoria = require('teoria');
+
 var play = launchpad.getButton(8,0);
 var pause = launchpad.getButton(8,1);
 var stop =  launchpad.getButton(8,2);
@@ -19,6 +24,19 @@ var bank = launchpad.getButton(8,3);
 var t = 0;
 var tempo = 120;
 var shifted = false;
+
+var notes = [];
+
+var scale = teoria.note("g4").scale('dorian').notes();
+scale.push(scale[0].interval('P8'))
+
+function playnotesfor(beat){
+    ticknotes = notes[beat];
+    for (var i = ticknotes.length - 1; i >= 0; i--) {
+        output.sendMessage([144, scale.get(ticknotes[i]).midi(), 90]);
+        output.sendMessage([128, scale.get(ticknotes[i]).midi(), 90]);
+    };
+}
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
 function cycle(array){

@@ -12,6 +12,7 @@
     "midi": "^0.9.3",
     "midi-clock": "0.0.1",
     "midi-launchpad": "^1.0.3",
-    "note-player-stream": "^1.0.2"
+    "note-player-stream": "^1.0.2",
+    "teoria": "~1.9.0"
   }
 }

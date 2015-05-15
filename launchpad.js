@@ -14,37 +14,38 @@ var stop =  launchpad.getButton(8,2);
 var tempoup =  launchpad.getButton(8,4);
 var tempodown =  launchpad.getButton(8,5);
 var shift =  launchpad.getButton(8,7);
+var bank = launchpad.getButton(8,3);
+
 var t = 0;
 var tempo = 120;
 var shifted = false;
 
-launchpad.on("ready",function(launchpad) {
-    launchpad.clear();pause
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
+function cycle(array){
+    var nextIndex = 0;
+    return {
+       next: function(){
+            if (nextIndex == array.length){
+                nextIndex = 0
+            }
+            return  array[nextIndex++];
+       }
+    }
+}
+
+function initcontrols() {
+    launchpad.clear();
     play.light(launchpad.colors.green.high);
     pause.light(launchpad.colors.orange.medium);
     stop.light(launchpad.colors.red.medium);
     shift.light(launchpad.colors.yellow.medium);
     tempoup.light(launchpad.colors.green.low);
     tempodown.light(launchpad.colors.red.low);
-    clock.setTempo(tempo);
-});
+};
 
-tempoup.on("press", function(button){
-    tempo += (shifted ? 10 : 1);
+launchpad.on("ready",function(launchpad) {
+    initcontrols();
     clock.setTempo(tempo);
-});
-
-tempodown.on("press", function(button){
-    tempo -= (shifted ? 10 : 1);
-    clock.setTempo(tempo);
-});
-
-pause.on("press", function(button) {
-    // Stop the clock without reseting the tick
-    clock.stop();
-    play.light(launchpad.colors.green.high);
-    pause.light(launchpad.colors.orange.low);
-    stop.light(launchpad.colors.red.high);
 });
 
 play.on("press", function(button) {
@@ -53,6 +54,14 @@ play.on("press", function(button) {
     play.light(launchpad.colors.green.low);
     pause.light(launchpad.colors.orange.medium);
     stop.light(launchpad.colors.red.medium);
+});
+
+pause.on("press", function(button) {
+    // Stop the clock without reseting the tick
+    clock.stop();
+    play.light(launchpad.colors.green.high);
+    pause.light(launchpad.colors.orange.low);
+    stop.light(launchpad.colors.red.high);
 });
 
 stop.on("press", function(button) {
@@ -67,6 +76,31 @@ stop.on("press", function(button) {
     play.light(launchpad.colors.green.high);
     pause.light(launchpad.colors.orange.medium);
     stop.light(launchpad.colors.red.medium);
+});
+
+var bankcolours = cycle([
+    launchpad.colors.green.high,
+    launchpad.colors.yellow.high,
+    launchpad.colors.orange.high,
+    launchpad.colors.red.high,
+    0]);
+
+bank.on("press", function(button){
+    if (shifted){
+        initcontrols();
+    } else {
+        bank.light(bankcolours.next());
+    }
+});
+
+tempoup.on("press", function(button){
+    tempo += (shifted ? 10 : 1);
+    clock.setTempo(tempo);
+});
+
+tempodown.on("press", function(button){
+    tempo -= (shifted ? 10 : 1);
+    clock.setTempo(tempo);
 });
 
 shift.on("press", function(button) {

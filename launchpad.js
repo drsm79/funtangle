@@ -111,7 +111,7 @@ function (err, result) {
         } else if (state == launchpad.colors.yellow.high){
             button.light(launchpad.colors.yellow.medium);
         } else if (state == launchpad.colors.red.high){
-            button.light(0);
+            button.dark();
         }
         // there's a no op for green/yellow medium for accents/glides
     }
@@ -129,8 +129,14 @@ function (err, result) {
     function addNote(button){
         var current = button.getState();
         if (current == bank.getState()){
-            button.light(0);
+            button.dark();
             // TODO: remove from list
+            var midimessage = [128, scale[button.y].midi(), 0];
+            outputs[current].output.sendMessage(midimessage);
+            outputs[current].notes[button.x] = _.without(
+                outputs[current].notes[button.x],
+                button.y
+            );
         } else {
             button.light(bank.getState());
             outputs[bank.getState()].notes[button.x].push(button.y);
@@ -162,7 +168,8 @@ function (err, result) {
         if (synth >= 0){
             outputs[bankcolours[n]] = {
                 output: new midi.output(),
-                notes: [[], [], [], [], [], [], [], []]
+                notes: [[], [], [], [], [], [], [], []],
+                name: masteroutput.getPortName(synth)
             };
             outputs[bankcolours[n]].output.openPort(synth, "funtangle");
         }
@@ -175,7 +182,10 @@ function (err, result) {
         if (shifted){
             initcontrols();
         } else {
-            bank.light(bankcycle.next());
+            var b = bankcycle.next();
+            if (b > 0) {console.log(outputs[b].name)};
+            bank.light(b);
+            drawGrid(launchpad, b);
         }
     });
     clock.on('position', function(position){
@@ -231,6 +241,22 @@ function donotesfor(launchpad, beat, message){
             value.output.sendMessage([message, note, velocity]);
         };
     });
+}
+
+function drawGrid(launchpad, bank){
+    // Wipe the area
+    for(var y = 0; y < 8; y++) {
+        for(var x = 0; x < 8; x++) {
+            launchpad.getButton(x, y).dark();
+        }
+    };
+    if(outputs[bank]){
+        _.each(outputs[bank].notes, function(element, x) {
+            _.each(element, function(y){
+                launchpad.getButton(x, y).light(bank);
+            });
+        });
+    }
 }
 
 function notesOff(){

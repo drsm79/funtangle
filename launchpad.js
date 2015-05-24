@@ -75,23 +75,6 @@ function (err, result) {
         stop.light(launchpad.colors.red.medium);
     });
 
-    var bankcolours = [
-        launchpad.colors.green.high,
-        launchpad.colors.yellow.high,
-        launchpad.colors.orange.high,
-        launchpad.colors.red.high,
-        0];
-
-    var bankcycle = cycle(bankcolours);
-
-    bank.on("press", function(button){
-        if (shifted){
-            initcontrols();
-        } else {
-            bank.light(bankcycle.next());
-        }
-    });
-
     tempoup.on("press", function(button){
         tempo += (shifted ? 10 : 1);
         clock.setTempo(tempo);
@@ -166,6 +149,13 @@ function (err, result) {
         }
     });
 
+    var bankcolours = [
+        launchpad.colors.green.high,
+        launchpad.colors.yellow.high,
+        launchpad.colors.orange.high,
+        launchpad.colors.red.high
+    ];
+
     _(masteroutput.getPortCount() - 1).times(function(n){
         var name = 'synth' + (n + 1);
         var synth = parseInt(result['synth' + (n + 1)]);
@@ -178,6 +168,16 @@ function (err, result) {
         }
     });
 
+    // Want an infinite cycle of elements, the size of all the outputs + 0 element
+    var bankcycle = cycle(_.flatten([_.first(bankcolours, _.size(outputs)), 0]));
+
+    bank.on("press", function(button){
+        if (shifted){
+            initcontrols();
+        } else {
+            bank.light(bankcycle.next());
+        }
+    });
     clock.on('position', function(position){
       var microPosition = position % 24;
       if (microPosition === 0){

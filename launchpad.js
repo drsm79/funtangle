@@ -3,6 +3,19 @@
 var _ = require('underscore');
 var midi = require('midi');
 var masteroutput = new midi.output();
+// https://github.com/saebekassebil/teoria
+var teoria = require('teoria');
+
+var t = 0;
+var tempo = 120;
+var shifted1 = false;
+var shifted2 = false;
+
+var masterscale = teoria.note("g4").scale('dorian').notes();
+masterscale.push(masterscale[0].interval('P8'));
+// Keeping 'natural' numbering of keypads means reversing the masterscale so highest
+// note is highest pad
+masterscale.reverse();
 
 var controllers = {};
 console.log('Pick your launchpad');
@@ -28,8 +41,8 @@ function (err, result) {
 
     var play = launchpad.getButton(8,0);
     var stop = launchpad.getButton(8,1);
-    var tempoup = launchpad.getButton(8,4);
-    var tempodown = launchpad.getButton(8,5);
+    var up = launchpad.getButton(8,4);
+    var down = launchpad.getButton(8,5);
     var shift1 = launchpad.getButton(8,6);
     var shift2 = launchpad.getButton(8,7);
     var bank = launchpad.getButton(8,3);
@@ -43,8 +56,8 @@ function (err, result) {
         stop.light(launchpad.colors.red.medium);
         shift1.light(launchpad.colors.orange.medium);
         shift2.light(launchpad.colors.yellow.medium);
-        tempoup.light(launchpad.colors.green.low);
-        tempodown.light(launchpad.colors.red.low);
+        up.light(launchpad.colors.green.low);
+        down.light(launchpad.colors.red.low);
     };
 
     launchpad.on("ready",function(launchpad) {
@@ -77,14 +90,24 @@ function (err, result) {
         stop.light(launchpad.colors.red.medium);
     });
 
-    tempoup.on("press", function(button){
-        tempo += (shifted2 ? 10 : 1);
-        clock.setTempo(tempo);
+    up.on("press", function(button){
+        if (shifted1){
+            console.log('up an octave');
+            bankOctave('P8', bank.getState());
+        } else {
+            tempo += (shifted2 ? 10 : 1);
+            clock.setTempo(tempo);
+        }
     });
 
-    tempodown.on("press", function(button){
-        tempo -= (shifted2 ? 10 : 1);
-        clock.setTempo(tempo);
+    down.on("press", function(button){
+        if (shifted1){
+            console.log('down an octave');
+            bankOctave('P-8', bank.getState());
+        } else {
+            tempo -= (shifted2 ? 10 : 1);
+            clock.setTempo(tempo);
+        }
     });
 
     shift1.on("press", function(button) {
@@ -141,7 +164,7 @@ function (err, result) {
         if (current == bank.getState()){
             button.dark();
             // TODO: remove from list
-            var midimessage = [128, scale[button.y].midi(), 0];
+            var midimessage = [128, outputs[current].scale[button.y].midi(), 0];
             outputs[current].output.sendMessage(midimessage);
             outputs[current].notes[button.x] = _.without(
                 outputs[current].notes[button.x],
@@ -179,7 +202,8 @@ function (err, result) {
             outputs[bankcolours[n]] = {
                 output: new midi.output(),
                 notes: [[], [], [], [], [], [], [], []],
-                name: masteroutput.getPortName(synth)
+                name: masteroutput.getPortName(synth),
+                scale: masterscale
             };
             outputs[bankcolours[n]].output.openPort(synth, "funtangle");
         }
@@ -209,6 +233,7 @@ function (err, result) {
             donotesfor(launchpad, 7, 128);
         }
         lighttick(launchpad.getButton(t, 8));
+        console.log(t);
         if (t > 0){
             darktick(launchpad.getButton(t - 1, 8));
         } else {
@@ -224,21 +249,7 @@ var clock = MidiClock();
 
 // https://www.npmjs.com/package/midi-looper
 // https://www.npmjs.com/package/midi-looper-launchpad
-// https://github.com/saebekassebil/teoria
-var teoria = require('teoria');
 
-var t = 0;
-var tempo = 120;
-var shifted1 = false;
-var shifted2 = false;
-
-var notes = [];
-
-var scale = teoria.note("g4").scale('dorian').notes();
-scale.push(scale[0].interval('P8'));
-// Keeping 'natural' numbering of keypads means reversing the scale so highest
-// note is highest pad
-scale.reverse();
 // Midi messages:
 // 128 = stop note, channel 1 (increase by 1 for each channel)
 // 144 = play note, channel 1 (increase by 1 for each channel)
@@ -248,7 +259,7 @@ function donotesfor(launchpad, beat, message){
         var accented = launchpad.getButton(beat, 8).getState() == launchpad.colors.green.medium;
         var velocity = accented ? 120 : 90;
         for (var i = ticknotes.length - 1; i >= 0; i--) {
-            var note = scale[ticknotes[i]].midi();
+            var note = value.scale[ticknotes[i]].midi();
             value.output.sendMessage([message, note, velocity]);
         };
     });
@@ -266,6 +277,14 @@ function drawGrid(launchpad, bank){
             _.each(element, function(y){
                 launchpad.getButton(x, y).light(bank);
             });
+        });
+    }
+}
+
+function bankOctave(adjustment, bank){
+    if (bank > 0){
+        outputs[bank].scale = _.map(outputs[bank].scale, function(n){
+            return n.interval(adjustment)
         });
     }
 }

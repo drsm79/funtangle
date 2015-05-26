@@ -30,7 +30,8 @@ function (err, result) {
     var stop = launchpad.getButton(8,1);
     var tempoup = launchpad.getButton(8,4);
     var tempodown = launchpad.getButton(8,5);
-    var shift = launchpad.getButton(8,7);
+    var shift1 = launchpad.getButton(8,6);
+    var shift2 = launchpad.getButton(8,7);
     var bank = launchpad.getButton(8,3);
     var ticks = cycle(_.range(8));
     var t = 0;
@@ -40,7 +41,8 @@ function (err, result) {
         notesOff();
         play.light(launchpad.colors.green.high);
         stop.light(launchpad.colors.red.medium);
-        shift.light(launchpad.colors.yellow.medium);
+        shift1.light(launchpad.colors.orange.medium);
+        shift2.light(launchpad.colors.yellow.medium);
         tempoup.light(launchpad.colors.green.low);
         tempodown.light(launchpad.colors.red.low);
     };
@@ -76,21 +78,29 @@ function (err, result) {
     });
 
     tempoup.on("press", function(button){
-        tempo += (shifted ? 10 : 1);
+        tempo += (shifted2 ? 10 : 1);
         clock.setTempo(tempo);
     });
 
     tempodown.on("press", function(button){
-        tempo -= (shifted ? 10 : 1);
+        tempo -= (shifted2 ? 10 : 1);
         clock.setTempo(tempo);
     });
 
-    shift.on("press", function(button) {
-        shifted = true;
+    shift1.on("press", function(button) {
+        shifted1 = true;
     });
 
-    shift.on("release", function(button) {
-        shifted = false;
+    shift1.on("release", function(button) {
+        shifted1 = false;
+    });
+
+    shift2.on("press", function(button) {
+        shifted2 = true;
+    });
+
+    shift2.on("release", function(button) {
+        shifted2 = false;
     });
 
     function lighttick(button){
@@ -145,7 +155,7 @@ function (err, result) {
 
     launchpad.on("press", function(button) {
         if (button.y == 8){
-            if (!shifted){
+            if (!shifted2){
                 accent(button);
             } else {
                 glide(button);
@@ -179,7 +189,7 @@ function (err, result) {
     var bankcycle = cycle(_.flatten([_.first(bankcolours, _.size(outputs)), 0]));
 
     bank.on("press", function(button){
-        if (shifted){
+        if (shifted2){
             initcontrols();
         } else {
             var b = bankcycle.next();
@@ -219,7 +229,8 @@ var teoria = require('teoria');
 
 var t = 0;
 var tempo = 120;
-var shifted = false;
+var shifted1 = false;
+var shifted2 = false;
 
 var notes = [];
 

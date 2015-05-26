@@ -215,6 +215,9 @@ function (err, result) {
     bank.on("press", function(button){
         if (shifted2){
             initcontrols();
+            _.each(outputs, function(v, k){
+                outputs[k].notes =  [[], [], [], [], [], [], [], []]
+            });
         } else {
             var b = bankcycle.next();
             if (b > 0) {console.log(outputs[b].name)};

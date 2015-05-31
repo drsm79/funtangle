@@ -164,12 +164,14 @@ function (err, result) {
         if (current == bank.getState()){
             button.dark();
             // TODO: remove from list
-            var midimessage = [128, outputs[current].scale[button.y].midi(), 0];
-            outputs[current].output.sendMessage(midimessage);
-            outputs[current].notes[button.x] = _.without(
-                outputs[current].notes[button.x],
-                button.y
-            );
+            if (current > 0){
+                var midimessage = [128, outputs[current].scale[button.y].midi(), 0];
+                outputs[current].output.sendMessage(midimessage);
+                outputs[current].notes[button.x] = _.without(
+                    outputs[current].notes[button.x],
+                    button.y
+                );
+            }
         } else {
             button.light(bank.getState());
             outputs[bank.getState()].notes[button.x].push(button.y);

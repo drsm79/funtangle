@@ -265,12 +265,12 @@ function (err, result) {
       var microPosition = position % 24;
       if (microPosition === 0){
         t = ticks.next();
-        donotesfor(launchpad, t, 144);
         if (t > 0){
             donotesfor(launchpad, t-1, 128);
         } else {
             donotesfor(launchpad, 7, 128);
         }
+        donotesfor(launchpad, t, 144);
         lighttick(launchpad.getButton(t, 8));
         // console.log(t);
         if (t > 0){

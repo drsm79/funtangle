@@ -2,6 +2,7 @@
 // https://github.com/justinlatimer/node-midi
 var _ = require('underscore');
 var midi = require('midi');
+var cycle = require('./utils').cycle;
 var masteroutput = new midi.output();
 // https://github.com/saebekassebil/teoria
 var teoria = require('teoria');
@@ -163,7 +164,6 @@ function (err, result) {
         var current = button.getState();
         if (current == bank.getState()){
             button.dark();
-            // TODO: remove from list
             if (current > 0){
                 var midimessage = [128, outputs[current].scale[button.y].midi(), 0];
                 outputs[current].output.sendMessage(midimessage);
@@ -299,16 +299,3 @@ function notesOff(){
         value.output.sendMessage([176, 120, 0])
     });
 }
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
-function cycle(array){
-    var nextIndex = 0;
-    return {
-       next: function(){
-            if (nextIndex == array.length){
-                nextIndex = 0
-            }
-            return  array[nextIndex++];
-       }
-    }
-}
-

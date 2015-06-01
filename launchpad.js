@@ -4,6 +4,7 @@ var _ = require('underscore');
 var midi = require('midi');
 var cycle = require('./utils').cycle;
 var masteroutput = new midi.output();
+var masterinput = new midi.input();
 // https://github.com/saebekassebil/teoria
 var teoria = require('teoria');
 
@@ -19,11 +20,23 @@ masterscale.push(masterscale[0].interval('P8'));
 masterscale.reverse();
 
 var controllers = {};
+var unevenMidi = (masteroutput.getPortCount() != masterinput.getPortCount());
+
 console.log('Pick your launchpad');
 _(masteroutput.getPortCount()).times(function(n){
     controllers[masteroutput.getPortName(n)] = n;
-    console.log(masteroutput.getPortName(n), ': ', n);
+    console.log('out', masteroutput.getPortName(n), ': ', n);
 });
+
+if (unevenMidi){
+    // Turn the controllers ports into a dict of {in, out}
+    _(masterinput.getPortCount()).times(function(n){
+        controllers[masterinput.getPortName(n)] = {
+            in: n,
+            out: controllers[masterinput.getPortName(n)]
+        };
+    });
+}
 
 var outputs = {};
 var prompt = require('prompt');
@@ -38,7 +51,28 @@ prompt.get(
     ], masteroutput.getPortCount()),
 function (err, result) {
     // https://github.com/sydlawrence/node-midi-launchpad
-    var launchpad = require('midi-launchpad').connect(parseInt(result.launchpad));
+    var lp = require('midi-launchpad');
+    var launchpad;
+    if (unevenMidi){
+        launchpad = new lp.Launchpad(0, false);
+        // Close and delete the ports, remove callback
+        launchpad.output.closePort();
+        delete launchpad.output;
+        launchpad.input.closePort();
+        delete launchpad.input;
+
+        // then repoen them with the differing ports and readd callback
+        var ports = controllers[masteroutput.getPortName(parseInt(result.launchpad))];
+        launchpad.output = new midi.output();
+        launchpad.output.openPort(ports.out);
+        launchpad.input = new midi.input();
+        launchpad.input.openPort(ports.in);
+        launchpad.input.on('message', function(deltaTime, message) {
+            launchpad.receiveMessage(deltaTime, message);
+        });
+    } else {
+        launchpad = lp.connect(parseInt(result.launchpad));
+    }
 
     var play = launchpad.getButton(8,0);
     var stop = launchpad.getButton(8,1);
@@ -238,7 +272,7 @@ function (err, result) {
             donotesfor(launchpad, 7, 128);
         }
         lighttick(launchpad.getButton(t, 8));
-        console.log(t);
+        // console.log(t);
         if (t > 0){
             darktick(launchpad.getButton(t - 1, 8));
         } else {

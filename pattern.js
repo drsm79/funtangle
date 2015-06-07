@@ -54,15 +54,22 @@ var Pattern = function(probability, scale){
   };
 };
 
-var masterscale = teoria.note("g4").scale('dorian').notes();
-masterscale.push(masterscale[0].interval('P8'));
-// Keeping 'natural' numbering of keypads means reversing the masterscale so highest
-// note is highest pad
-masterscale.reverse();
+function createscale(key, scale){
+  var key = key || "g4";
+  var scale = scale || "dorian";
+  var scale = teoria.note(key).scale(scale).notes();
+  // TODO: repeat this to make 8 note scales?
+  scale.push(scale[0].interval('P8'));
+  // Keeping 'natural' numbering of keypads means reversing the scale so
+  // highest note is highest pad
+  scale.reverse();
+  return scale;
+}
 
-var ScalePattern = function(probability, scale){
+
+var ScalePattern = function(probability, key, scale){
   _.extend(this, new Pattern(probability));
-  this.scale = scale || masterscale;
+  this.scale = createscale(key, scale);
   this.addnote = function(button, probability, accented){
     // Add a note to the pattern
     this.notes[button.x].push({

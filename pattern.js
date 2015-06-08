@@ -27,22 +27,28 @@ var Pattern = function(probability, scale){
   this.notes = [[], [], [], [], [], [], [], []];
   this.baseProbability = probability || 100;
 
-  this.addnote = function(button, probability, accented){
-    // Add a note to the pattern
-    this.notes[button.x].push({
+  this._makenote = function(button, color, probability, accented){
+    return {
       button: button,
       midi: this.scale[button.y],
       accented: accented || false,
-      colour: button.getState(),
-      probability: probabilities[invertedcolors[button.getState()]] * this.baseProbability
-    });
-    console.log(this.notes[button.x][0].probability);
+      colour: color,
+      probability: probability
+    };
+  };
+  this.addnote = function(button, color, probability, accented){
+    // Add a note to the pattern
+    console.log('add note!', color, probability);
+    var note = this._makenote(button, color, probability, accented);
+    this.notes[button.x].push(note);
+    button.light(note.colour);
   };
   this.dropnote = function(button){
     this.notes[button.x] = _.filter(
       this.notes[button.x],
       function(note){return note.button != button;}
     );
+    button.dark();
   };
   this.velocity = function(note){
     return note.accented ? 120 : 90;
@@ -85,14 +91,15 @@ function createscale(key, scale){
 var ScalePattern = function(probability, key, scale){
   _.extend(this, new Pattern(probability));
   this.scale = createscale(key, scale);
-  this.addnote = function(button, probability, accented){
+  this._makenote = function(button, color, probability, accented){
     // Add a note to the pattern
-    this.notes[button.x].push({
+    return {
       button: button,
       midi: this.scale[button.y].midi(),
-      probability: probability || this.baseProbability,
-      accented: accented || false
-    });
+      accented: accented || false,
+      colour: color,
+      probability: probability
+    };
   }
 };
 

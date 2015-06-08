@@ -11,6 +11,16 @@ var testTempo = 140;
 
 var sequencer = new Sequencer(testTempo);
 
+var synths = {
+  'green': new Output(sequencer, 0, 1, new patterns.ScalePattern()),
+  'orange': new Output(sequencer, 0, 1, new patterns.ScalePattern()),
+  'yellow': new Output(sequencer, 0, 1, new patterns.ScalePattern()),
+  'red': new Output(sequencer, 0, 1, new patterns.ScalePattern())
+}
+
+// TODO: determine this from the CLI/UI
+var banks = cycle(_.keys(synths));
+
 var buttons = {
   'playpause': {
     'position': {x: 8, y: 0},
@@ -34,7 +44,7 @@ var buttons = {
   },
   'bank': {
     'position': {x: 8, y: 5},
-    'color': launchpad.colors.green.high,
+    'color': launchpad.colors[banks.next()].high,
     'callbacks': {},
   },
   'shift1': {
@@ -109,14 +119,7 @@ buttons.down.callbacks.press = function(){
     console.log('normal down');
   }
 };
-var synths = {
-  'green': new Output(sequencer, 0, 1, new patterns.ScalePattern()),
-  'orange': new Output(sequencer, 0, 1, new patterns.ScalePattern()),
-  'yellow': new Output(sequencer, 0, 1, new patterns.ScalePattern()),
-  'red': new Output(sequencer, 0, 1, new patterns.ScalePattern())
-}
-// TODO: determine this from the CLI/UI
-var banks = cycle(_.keys(synths));
+
 
 var colors = _.object(
   _.map(_.keys(synths), function(c){return [launchpad.colors[c].high, c]})
@@ -126,7 +129,6 @@ buttons.bank.callbacks.press = function(){
   var bank = banks.next();
   this.button.light(launchpad.colors[bank].high);
   this.layout.drawGrid(launchpad.colors[bank].high, synths[bank].pattern);
-
 }
 
 buttons.shift1.callbacks.press = function(){
@@ -168,18 +170,21 @@ function addNote(arg){
   button.on('press', function(){
     var currentBank = arg.layout.buttons.bank.button.getState();
     var bank = synths[colors[currentBank]];
+    var color = currentBank;
     if (_.isEqual(0, button.getState())){
+      var probability = 1
       if (arg.layout.buttons.shift1.on) {
-        this.light(launchpad.colors[colors[currentBank]].low);
+        probability = 0.5;
+        color = button.launchpad.colors[colors[currentBank]].low;
       } else if (arg.layout.buttons.shift2.on) {
-        this.light(launchpad.colors[colors[currentBank]].medium);
-      } else {
-        this.light(launchpad.colors[colors[currentBank]].high);
+        probability = 0.75;
+        color = button.launchpad.colors[colors[currentBank]].medium;
       }
-      bank.pattern.addnote(this);
+      console.log('before', button.x, button.y, color, probability);
+      bank.pattern.addnote(button, color, probability);
+      console.log('after', currentBank, color);
     } else {
-      bank.pattern.dropnote(this);
-      button.dark();
+      bank.pattern.dropnote(button);
     }
   });
 }

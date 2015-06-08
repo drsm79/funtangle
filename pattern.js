@@ -5,6 +5,19 @@
 var teoria = require('teoria');
 var _ = require('underscore');
 
+var probabilities = {
+  'low': 0.5,
+  'medium': 0.75,
+  'high': 1
+}
+
+var invertedcolors = {};
+var colors = _.each(_.filter(_.map(require('midi-launchpad').colors, function(colour){
+  if (_.isObject(colour)){
+    return _.invert(colour);
+  }
+})), function(obj){_.extend(this, obj)}, invertedcolors);
+
 var Pattern = function(probability, scale){
   this.scale = scale || _.range(60, 67);
   this.midiMessages = {
@@ -19,9 +32,11 @@ var Pattern = function(probability, scale){
     this.notes[button.x].push({
       button: button,
       midi: this.scale[button.y],
-      probability: probability || this.baseProbability,
-      accented: accented || false
-    })
+      accented: accented || false,
+      colour: button.getState(),
+      probability: probabilities[invertedcolors[button.getState()]] * this.baseProbability
+    });
+    console.log(this.notes[button.x][0].probability);
   };
   this.dropnote = function(button){
     this.notes[button.x] = _.filter(
@@ -47,7 +62,7 @@ var Pattern = function(probability, scale){
           note.midi,
           this.velocity(note)
         ];
-        console.log(message, packet)
+        console.log(message, packet);
         output.midiOutput.sendMessage(packet);
       }
     }, this);

@@ -7,10 +7,10 @@ var Launchpad = require('midi-launchpad').Launchpad;
 
 var _ = require('underscore');
 
-var Transport = function(launchpad){
-  // play/pause and stop buttons
-  // tempo adjustment
-}
+// The UI has two commands:
+// funtangle list: list midi devices and their ports
+// funtangle -l/--launchpad X [--s1 [--s2 [--s3 [--s4]]]]: luand funtanlge
+//       connecting to launchpad and synths as specified
 
 exports.Transport = Transport;
 

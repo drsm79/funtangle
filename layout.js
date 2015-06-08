@@ -55,18 +55,18 @@ var Layout = function(){
       _.delay(_.bind(this._blink, this), 1000);
     }
   };
-  this.drawGrid = function(pattern){
+  this.drawGrid = function(bank, pattern){
     // Wipe the area
     for(var y = 0; y < 8; y++) {
         for(var x = 0; x < 8; x++) {
             this.launchpad.getButton(x, y).dark();
         }
     };
-    _.each(pattern.notes, function(element, x) {
-      _.each(element, function(y){
-        this.launchpad.getButton(x, y).light(bank);
-      }, this);
-    }, this);
+    _.each(pattern.notes, function(ticknotes) {
+      _.each(ticknotes, function(note){
+        note.button.light(bank);
+      });
+    });
   };
   this.clearArea = function(x1, x2, y1, y2) {
     for(var y = y1; y < y2; y++) {

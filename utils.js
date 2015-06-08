@@ -2,18 +2,14 @@
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
 
 var _ = require('underscore');
-// var Backbone = require("backbone");
 
 exports.cycle = function (array){
-  // _.extend(this, Backbone.Events);
   var nextIndex = 0;
   return {
    next: function(){
     if (nextIndex == array.length){
       nextIndex = 0;
-      // this.trigger('endcycle');
     }
-
     return array[nextIndex++];
    }
   }

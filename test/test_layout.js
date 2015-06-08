@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var launchpad = require('midi-launchpad').connect(1, false);
+var launchpad = require('midi-launchpad').connect(0, false);
 
 var cycle = require('../utils').cycle;
 var patterns = require('../pattern');
@@ -116,14 +116,17 @@ var synths = {
   'red': new Output(sequencer, 0, 1, new patterns.ScalePattern())
 }
 // TODO: determine this from the CLI/UI
-var banks = cycle(_.first(_.keys(synths)));
+var banks = cycle(_.keys(synths));
 
 var colors = _.object(
   _.map(_.keys(synths), function(c){return [launchpad.colors[c].high, c]})
 );
 
 buttons.bank.callbacks.press = function(){
-  this.button.light(launchpad.colors[banks.next()].high);
+  var bank = banks.next();
+  this.button.light(launchpad.colors[bank].high);
+  this.layout.drawGrid(launchpad.colors[bank].high, synths[bank].pattern);
+
 }
 
 buttons.shift1.callbacks.press = function(){
@@ -167,15 +170,13 @@ function addNote(arg){
     var bank = synths[colors[currentBank]];
     if (_.isEqual(0, button.getState())){
       if (arg.layout.buttons.shift1.on) {
-        bank.pattern.addnote(this, 0.5  * bank.pattern.baseProbability);
         this.light(launchpad.colors[colors[currentBank]].low);
       } else if (arg.layout.buttons.shift2.on) {
-        bank.pattern.addnote(this, 0.75  * bank.pattern.baseProbability);
         this.light(launchpad.colors[colors[currentBank]].medium);
       } else {
-        bank.pattern.addnote(this);
         this.light(launchpad.colors[colors[currentBank]].high);
       }
+      bank.pattern.addnote(this);
     } else {
       bank.pattern.dropnote(this);
       button.dark();

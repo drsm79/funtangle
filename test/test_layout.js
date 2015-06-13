@@ -171,6 +171,7 @@ function addNote(arg){
     var currentBank = arg.layout.buttons.bank.button.getState();
     var bank = synths[colors[currentBank]];
     var color = currentBank;
+
     if (_.isEqual(0, button.getState())){
       var probability = 1
       if (arg.layout.buttons.shift1.on) {

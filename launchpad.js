@@ -36,7 +36,7 @@ var Launchpad = function(outPort, inPort, banks){
         'both':{},
         'shift1': {},
         'shift2': {},
-        'none': {'catchall': }
+        'none': {'catchall': {}}
     }
 
     this.launchpad.on("press", function(button) {
@@ -54,7 +54,5 @@ var Launchpad = function(outPort, inPort, banks){
             console.log(button.toString());
             this.callbacks[shift]['catchall'](button);
         }
-    }
-
-    };
+    });
 }

@@ -31,4 +31,3 @@ exports.transposePattern = function (adjustment, pattern){
   // Change all the notes in the pattern
   // TODO
 }
-

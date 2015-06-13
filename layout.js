@@ -3,9 +3,10 @@ var _ = require('underscore');
 var Backbone = require("backbone");
 
 // A layout of buttons for the launchpad
-var Layout = function(){
+var Layout = function(outputs){
   _.extend(this, Backbone.Events);
   this.buttons = {};
+  this.outputs = outputs || {};
   this.init = function(launchpad, buttons, reset){
     this.buttons = buttons || this.buttons;
     this.launchpad = launchpad;

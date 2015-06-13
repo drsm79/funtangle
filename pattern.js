@@ -38,8 +38,12 @@ var Pattern = function(probability, scale){
   };
   this.addnote = function(button, color, probability, accented){
     // Add a note to the pattern
-    console.log('add note!', color, probability);
-    var note = this._makenote(button, color, probability, accented);
+    var note = this._makenote(
+      button,
+      color,
+      probability * this.baseProbability,
+      accented
+    );
     this.notes[button.x].push(note);
     button.light(note.colour);
   };
@@ -53,12 +57,12 @@ var Pattern = function(probability, scale){
   this.velocity = function(note){
     return note.accented ? 120 : 90;
   };
-  this.donotes = function(beat, message, output){
+  this.donotes = function(beat,
+    message, output){
     var ticknotes = this.notes[beat];
     _.each(ticknotes, function(note){
       var play = true;
       var chance = _.random(0, 100);
-      console.log(note.probability, chance);
       if (message == 'note_on' && chance > note.probability){
         play = false
       }
@@ -68,7 +72,6 @@ var Pattern = function(probability, scale){
           note.midi,
           this.velocity(note)
         ];
-        console.log(message, packet);
         output.midiOutput.sendMessage(packet);
       }
     }, this);

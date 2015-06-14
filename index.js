@@ -44,12 +44,10 @@ if (args._[0] != 'ports'){
   var i = 0;
   // iterate through outputs, creating a new Output and building up the synths obj
   _.each(outputs, function(value, key, list){
-    console.log(key);
     synths[colornames[i]] = new Output(sequencer, value, 1, new patterns.ScalePattern());
-    console.log(synths[colornames[i]].midiOutput.getPortName(value));
+    console.log(synths[colornames[i]].midiOutput.getPortName(value), 'is go!');
     i++;
   });
-  console.log(outputs);
 
   var colorobj = _.object(
     _.map(_.keys(synths), function(c){return [launchpad.colors[c].high, c]})
@@ -66,10 +64,10 @@ if (args._[0] != 'ports'){
         var probability = 1
         if (arg.layout.buttons.shift1.on) {
           probability = 0.5;
-          color = button.launchpad.colors[colors[currentBank]].low;
+          color = button.launchpad.colors[colorobj[currentBank]].low;
         } else if (arg.layout.buttons.shift2.on) {
           probability = 0.75;
-          color = button.launchpad.colors[colors[currentBank]].medium;
+          color = button.launchpad.colors[colorobj[currentBank]].medium;
         }
         bank.pattern.addnote(button, color, probability);
       } else {

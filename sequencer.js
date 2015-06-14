@@ -24,16 +24,16 @@ var Sequencer = function(bpm){
   };
   this.play = function(){
     this.clock.start();
-    this.trigger('play');
+    this.trigger('seq:play');
   };
   this.pause = function(){
     this.clock.stop();
-    this.trigger('pause');
+    this.trigger('seq:pause');
   };
   this.stop = function(){
     this.clock.stop();
     this.ticks = cycle(_.range(8));
-    this.trigger('stop');
+    this.trigger('seq:stop');
   };
 }
 

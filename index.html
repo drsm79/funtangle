@@ -19,17 +19,76 @@
     </section>
 
     <section class="main-content">
-      <h1>
-<a id="funtangle" class="anchor" href="#funtangle" aria-hidden="true"><span class="octicon octicon-link"></span></a>Funtangle</h1>
+      <h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<p>You will need <a href="https://nodejs.org/">node &amp; npm</a> to install and use Funtangle. The intention is
+for it to run on a Raspberry Pi, but to date it's only tested on OSX.</p>
+
+<p>First clone the repo and install the dependencies:</p>
+
+<pre><code>$ git clone https://github.com/drsm79/funtangle.git
+$ cd funtangle
+$ npm install
+</code></pre>
 
 <h2>
-<a id="links" class="anchor" href="#links" aria-hidden="true"><span class="octicon octicon-link"></span></a>Links</h2>
+<a id="run" class="anchor" href="#run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run</h2>
 
-<ul>
-<li>
-<a href="https://twitter.com/funtangle">https://twitter.com/funtangle</a> </li>
-<li><a href="https://waffle.io/drsm79/funtangle">https://waffle.io/drsm79/funtangle</a></li>
-</ul>
+<p>Next run <code>node index.js ports</code> to see what you've got plugged in where:</p>
+
+<pre><code>$ node index.js ports
+==&gt; Midi outputs
+MiniBrute :  0
+MiniBrute MIDI Interface :  1
+ZOOM R16_R24 :  2
+Streichfett :  3
+MicroBrute :  4
+MicroBrute MIDI Interface :  5
+Launchpad Mini :  6
+MIDI Monitor (Untitled) :  7
+==&gt; Midi inputs
+MiniBrute :  0
+MiniBrute MIDI Interface :  1
+ZOOM R16_R24 :  2
+Streichfett :  3
+MicroBrute :  4
+MicroBrute MIDI Interface :  5
+Launchpad Mini :  6
+WARNING: uneven midi (more inputs than outputs or vice versa)
+</code></pre>
+
+<p>Now you can launch funtangle with the midi devices you want to use:</p>
+
+<pre><code>$ node index.js -l6 --synth1 0 --synth2 3 --synth3 4
+start funtangle
+setting up Launchpad on port:6
+running launchpad: Launchpad Mini
+MiniBrute is go!
+Streichfett is go!
+MicroBrute is go!
+ssshhhh!
+</code></pre>
+
+<h2>
+<a id="buttons" class="anchor" href="#buttons" aria-hidden="true"><span class="octicon octicon-link"></span></a>Buttons</h2>
+
+<p>The round buttons across the top are currently just used as tick markers. They
+will eventually work as accent and step on/off buttons.</p>
+
+<p>The round buttons down the side (labelled A-H) have per layout functions. For
+the step entry layout they are; A: play/pause, B: stop, C: unused, D: up, E:
+down, F: bank (cycles through the midi devices), G: shift 1, H: shift 2. Shift
+1 &amp; 2 can be used together for a third shift.</p>
+
+<p>In the step entry layout the main 8 x 8 grid is step entry, ticks are
+horizontal, notes of the scale vertical. Shift 1 changes the probability of a
+note being played to 50%, shift 2 changes it to 75%.</p>
+
+<h2>
+<a id="contribute" class="anchor" href="#contribute" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contribute</h2>
+
+<p>Ideas and patches are very welcome in the <a href="https://github.com/drsm79/funtangle/issues">issue tracker</a>.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/drsm79/funtangle">Funtangle</a> is maintained by <a href="https://github.com/drsm79">drsm79</a>.</span>

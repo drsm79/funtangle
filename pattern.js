@@ -18,8 +18,9 @@ var colors = _.each(_.filter(_.map(require('midi-launchpad').colors, function(co
   }
 })), function(obj){_.extend(this, obj)}, invertedcolors);
 
-var Pattern = function(probability, scale){
-  this.repr = {"probability": probability, "scale": scale};
+var Pattern = function(probability, scale, voices){
+  this.voices = voices || 8;
+  this.repr = {"probability": probability, "scale": scale, "voices": voices};
   this.scale = scale || _.range(60, 67);
   this.midiMessages = {
     'note_on': 143,
@@ -48,6 +49,10 @@ var Pattern = function(probability, scale){
       probability * this.baseProbability,
       accented
     );
+    if (this.notes[button.x].length == this.voices){
+      // Patterns can only have as many notes as voices
+      this.dropnote(this.notes[button.x].shift().button);
+    }
     this.notes[button.x].push(note);
     button.light(note.colour);
   };
@@ -94,8 +99,8 @@ function createscale(key, scale){
 }
 
 
-var ScalePattern = function(probability, key, scale){
-  _.extend(this, new Pattern(probability, scale));
+var ScalePattern = function(probability, key, scale, voices){
+  _.extend(this, new Pattern(probability, scale, voices));
   this.scale = createscale(key, scale);
   this.repr.key = key;
   this.repr.type = 'ScalePattern';
@@ -115,9 +120,9 @@ function patternFactory(pattern){
   if (_.isUndefined(pattern)){
     return new Pattern();
   } else if (pattern.type == 'ScalePattern'){
-    return new ScalePattern(pattern.probability, pattern.key, pattern.scale);
+    return new ScalePattern(pattern.probability, pattern.key, pattern.scale, pattern.voices);
   } else {
-    return new Pattern(pattern.probability, pattern.scale);
+    return new Pattern(pattern.probability, pattern.scale, pattern.voices);
   };
 };
 

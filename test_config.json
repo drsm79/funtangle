@@ -1,0 +1,12 @@
+{
+  "launchpad": 0,
+  "synth1": {
+    "midiPort": 1,
+    "pattern": {
+      "voices": 2,
+      "type": "ScalePattern",
+      "key": "D3",
+      "scale": "aeolian"
+    }
+  }
+}

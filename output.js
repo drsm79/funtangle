@@ -4,7 +4,7 @@ var Backbone = require("backbone");
 var midi = require('midi');
 var patterns = require('./pattern');
 
-var Output = function(sequencer, midiPort, midiChannel, pattern){
+var Output = function(sequencer, midiPort, midiChannel, pattern, voices){
   this.midiOutput = new midi.output();
   this.midiPort = midiPort;
   this.midiOutput.openPort(this.midiPort, 'funtangle');

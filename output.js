@@ -23,7 +23,11 @@ var Output = function(sequencer, midiPort, midiChannel, pattern){
     this.pattern.donotes(tick, 'note_on', this);
   });
   this.toJSON = function(){
-    return {"midiChannel": this.midiChannel, "midiPort": this.midiPort};
+    return {
+      "midiChannel": this.midiChannel,
+      "midiPort": this.midiPort,
+      "pattern": this.pattern
+    };
   };
 }
 

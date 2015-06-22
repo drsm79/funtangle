@@ -54,15 +54,15 @@ if (args._[0] != 'ports'){
   // iterate through outputs, creating a new Output and building up the synths obj
   _.each(outputs, function(midi, key, list){
     if (_.isObject(midi)){
-      // TODO: if this is an object use a factory instead of `new Output`
-      var pattern = new patterns.ScalePattern();
-      synths[colornames[i]] = output.outputFactory(midi, sequencer, pattern);
-      console.log(JSON.stringify(synths[colornames[i]]));
-      console.log(synths[colornames[i]].name, 'is go!');
+      synths[colornames[i]] = output.outputFactory(
+        midi,
+        sequencer,
+        patterns.patternFactory(midi.pattern)
+      );
     } else {
       synths[colornames[i]] = new output.Output(sequencer, midi, 1, new patterns.ScalePattern());
-      console.log(synths[colornames[i]].name, 'is go!');
     }
+    console.log(synths[colornames[i]].name, 'is go!');
     i++;
   });
 

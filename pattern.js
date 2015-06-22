@@ -19,6 +19,7 @@ var colors = _.each(_.filter(_.map(require('midi-launchpad').colors, function(co
 })), function(obj){_.extend(this, obj)}, invertedcolors);
 
 var Pattern = function(probability, scale){
+  this.repr = {"probability": probability, "scale": scale};
   this.scale = scale || _.range(60, 67);
   this.midiMessages = {
     'note_on': 143,
@@ -35,6 +36,9 @@ var Pattern = function(probability, scale){
       colour: color,
       probability: probability
     };
+  };
+  this.toJSON = function(){
+    return this.repr;
   };
   this.addnote = function(button, color, probability, accented){
     // Add a note to the pattern
@@ -80,8 +84,7 @@ var Pattern = function(probability, scale){
 
 function createscale(key, scale){
   var key = key || "g4";
-  var scale = scale || "dorian";
-  var scale = teoria.note(key).scale(scale).notes();
+  var scale = teoria.note(key).scale(scale || "dorian").notes();
   // TODO: repeat this to make 8 note scales?
   scale.push(scale[0].interval('P8'));
   // Keeping 'natural' numbering of keypads means reversing the scale so
@@ -92,8 +95,10 @@ function createscale(key, scale){
 
 
 var ScalePattern = function(probability, key, scale){
-  _.extend(this, new Pattern(probability));
+  _.extend(this, new Pattern(probability, scale));
   this.scale = createscale(key, scale);
+  this.repr.key = key;
+  this.repr.type = 'ScalePattern';
   this._makenote = function(button, color, probability, accented){
     // Add a note to the pattern
     return {
@@ -103,8 +108,19 @@ var ScalePattern = function(probability, key, scale){
       colour: color,
       probability: probability
     };
-  }
+  };
+};
+
+function patternFactory(pattern){
+  if (_.isUndefined(pattern)){
+    return new Pattern();
+  } else if (pattern.type == 'ScalePattern'){
+    return new ScalePattern(pattern.probability, pattern.key, pattern.scale);
+  } else {
+    return new Pattern(pattern.probability, pattern.scale);
+  };
 };
 
 exports.Pattern = Pattern;
 exports.ScalePattern = ScalePattern;
+exports.patternFactory = patternFactory;

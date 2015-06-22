@@ -20,6 +20,7 @@ if (args._[0] != 'ports'){
   var colornames = ['green', 'orange', 'yellow', 'red'];
 
   var launchpad = require('midi-launchpad').connect(args.launchpad, false);
+
   var sequencer = new Sequencer(args.bpm);
   var synths = {};
 
@@ -76,25 +77,39 @@ if (args._[0] != 'ports'){
     });
   }
 
-  var stepentry = getStepEntry(synths, launchpad, sequencer);
-  allOff()
-  stepentry.applyToArea(lightStep, 0, 8, 8, 9);
-  stepentry.applyToArea(addNote, 0, 8, 0, 8);
 
-  sequencer.listenTo(stepentry, 'play', function(evt){
-    console.log('sequencer heard play');
-    this.play()
-  });
-  sequencer.listenTo(stepentry, 'pause', function(evt){
-    console.log('sequencer heard pause');
-    allOff();
-    this.pause()
-  });
-  sequencer.listenTo(stepentry, 'stop', function(evt){
-    console.log('sequencer heard stop');
-    allOff();
-    this.stop()
-  });
+  function render(){
+    launchpad.clear();
+    console.log('Drawing UI');
 
+    var stepentry = getStepEntry(synths, launchpad, sequencer);
+    allOff()
+    stepentry.applyToArea(lightStep, 0, 8, 8, 9);
+    stepentry.applyToArea(addNote, 0, 8, 0, 8);
 
+    sequencer.listenTo(stepentry, 'play', function(evt){
+      console.log('sequencer heard play');
+      this.play()
+    });
+    sequencer.listenTo(stepentry, 'pause', function(evt){
+      console.log('sequencer heard pause');
+      allOff();
+      this.pause()
+    });
+    sequencer.listenTo(stepentry, 'stop', function(evt){
+      console.log('sequencer heard stop');
+      allOff();
+      this.stop()
+    });
+  }
+
+  launchpad.scrollString('funtangle', 50, launchpad.colors.green.high, render);
+
+  process.on('SIGINT', function() {
+    launchpad.clear();
+    launchpad.scrollString('bye!', 50, launchpad.colors.green.high, function(){
+      launchpad.clear();
+      process.exit();
+    });
+  });
 }

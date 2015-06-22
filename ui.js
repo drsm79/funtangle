@@ -33,16 +33,22 @@ exports.parseArgs = function(){
       masterinput.closePort();
     })
     .alias('l', 'launchpad')
+    .nargs('l', 1)
     .default('l', 0)
+    .config('j')
+    .alias('j', 'json')
+    .nargs('j', 1)
+    .describe('j', 'Load config from a file')
     .alias('b', 'bpm')
     .default('b', 140)
+    .nargs('b', 1)
     .describe('synth1', 'pick the midi output for synth1')
     .describe('synth2', 'pick the midi output for synth2')
     .describe('synth3', 'pick the midi output for synth3')
     .describe('synth4', 'pick the midi output for synth4')
   .help('h')
   .alias('h', 'help')
-  .strict()
+  // .strict()
   .showHelpOnFail()
   .argv;
 }

@@ -13,8 +13,12 @@ var args = ui.parseArgs();
 
 if (args._[0] != 'ports'){
   console.log('start funtangle');
+
   var outputs = _.pick(args, function (value, key){
-    return (_.contains(['synth1', 'synth2', 'synth3', 'synth4'], key) && _.isNumber(value))
+    return (
+      _.contains(['synth1', 'synth2', 'synth3', 'synth4'], key)
+      && (_.has(value, 'midiChannel') || _.isNumber(value))
+    );
   });
 
   var colornames = ['green', 'orange', 'yellow', 'red'];
@@ -44,9 +48,13 @@ if (args._[0] != 'ports'){
 
   var i = 0;
   // iterate through outputs, creating a new Output and building up the synths obj
-  _.each(outputs, function(value, key, list){
-    synths[colornames[i]] = new Output(sequencer, value, 1, new patterns.ScalePattern());
-    console.log(synths[colornames[i]].midiOutput.getPortName(value), 'is go!');
+  _.each(outputs, function(midi, key, list){
+    if (midi.midiChannel){
+      // TODO: if this is an object use a factory instead of `new Output`
+      midi = midi.midiChannel;
+    }
+    synths[colornames[i]] = new Output(sequencer, midi, 1, new patterns.ScalePattern());
+    console.log(synths[colornames[i]].midiOutput.getPortName(midi), 'is go!');
     i++;
   });
 

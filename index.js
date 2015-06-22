@@ -2,7 +2,7 @@ var ui = require('./ui');
 
 var patterns = require('./pattern');
 var Sequencer = require('./sequencer').Sequencer;
-var Output = require('./output').Output;
+var output = require('./output');
 // var launchpad = require('./launchpad');
 var getStepEntry = require('./stepentry').getStepEntry;
 
@@ -17,9 +17,13 @@ if (args._[0] != 'ports'){
   var outputs = _.pick(args, function (value, key){
     return (
       _.contains(['synth1', 'synth2', 'synth3', 'synth4'], key)
-      && (_.has(value, 'midiChannel') || _.isNumber(value))
+      && (_.has(value, 'midiPort') || _.isNumber(value))
     );
   });
+  if (outputs.length == 0){
+    console.log("No outputs - exiting");
+    process.exit();
+  }
 
   var colornames = ['green', 'orange', 'yellow', 'red'];
 
@@ -49,12 +53,16 @@ if (args._[0] != 'ports'){
   var i = 0;
   // iterate through outputs, creating a new Output and building up the synths obj
   _.each(outputs, function(midi, key, list){
-    if (midi.midiChannel){
+    if (_.isObject(midi)){
       // TODO: if this is an object use a factory instead of `new Output`
-      midi = midi.midiChannel;
+      var pattern = new patterns.ScalePattern();
+      synths[colornames[i]] = output.outputFactory(midi, sequencer, pattern);
+      console.log(JSON.stringify(synths[colornames[i]]));
+      console.log(synths[colornames[i]].name, 'is go!');
+    } else {
+      synths[colornames[i]] = new output.Output(sequencer, midi, 1, new patterns.ScalePattern());
+      console.log(synths[colornames[i]].name, 'is go!');
     }
-    synths[colornames[i]] = new Output(sequencer, midi, 1, new patterns.ScalePattern());
-    console.log(synths[colornames[i]].midiOutput.getPortName(midi), 'is go!');
     i++;
   });
 

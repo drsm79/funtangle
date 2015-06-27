@@ -43,18 +43,20 @@ var Pattern = function(probability, scale, voices){
   };
   this.addnote = function(button, color, probability, accented){
     // Add a note to the pattern
-    var note = this._makenote(
-      button,
-      color,
-      probability * this.baseProbability,
-      accented
-    );
-    if (this.notes[button.x].length == this.voices){
-      // Patterns can only have as many notes as voices
-      this.dropnote(this.notes[button.x].shift().button);
+    if (button.y < this.scale.length){
+      var note = this._makenote(
+        button,
+        color,
+        probability * this.baseProbability,
+        accented
+      );
+      if (this.notes[button.x].length == this.voices){
+        // Patterns can only have as many notes as voices
+        this.dropnote(this.notes[button.x].shift().button);
+      }
+      this.notes[button.x].push(note);
+      button.light(note.colour);
     }
-    this.notes[button.x].push(note);
-    button.light(note.colour);
   };
   this.dropnote = function(button){
     this.notes[button.x] = _.filter(

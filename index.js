@@ -60,7 +60,11 @@ if (args._[0] != 'ports'){
         patterns.patternFactory(midi.pattern)
       );
     } else {
-      synths[colornames[i]] = new output.Output(sequencer, midi, 1, new patterns.ScalePattern());
+      synths[colornames[i]] = new output.Output(
+        sequencer,
+        midi,
+        1,
+        new patterns.ScalePattern(100, args.key, args.scale));
     }
     console.log(synths[colornames[i]].name, 'is go!');
     i++;

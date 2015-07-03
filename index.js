@@ -97,29 +97,28 @@ if (args._[0] != 'ports'){
     });
   }
 
-
   function render(){
     launchpad.clear();
     console.log('Drawing UI');
 
     var stepentry = getStepEntry(synths, launchpad, sequencer);
-    allOff()
+    allOff();
     stepentry.applyToArea(lightStep, 0, 8, 8, 9);
     stepentry.applyToArea(addNote, 0, 8, 0, 8);
 
     sequencer.listenTo(stepentry, 'play', function(evt){
       console.log('sequencer heard play');
-      this.play()
+      this.play();
     });
     sequencer.listenTo(stepentry, 'pause', function(evt){
       console.log('sequencer heard pause');
       allOff();
-      this.pause()
+      this.pause();
     });
     sequencer.listenTo(stepentry, 'stop', function(evt){
       console.log('sequencer heard stop');
       allOff();
-      this.stop()
+      this.stop();
     });
   }
 

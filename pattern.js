@@ -20,7 +20,7 @@ var colors = _.each(_.filter(_.map(require('midi-launchpad').colors, function(co
 
 var Pattern = function(probability, scale, voices){
   this.voices = voices || 8;
-  this.repr = {"probability": probability, "scale": scale, "voices": voices};
+
   this.scale = scale || _.range(60, 67);
   this.midiMessages = {
     'note_on': 143,
@@ -28,6 +28,7 @@ var Pattern = function(probability, scale, voices){
   }
   this.notes = [[], [], [], [], [], [], [], []];
   this.baseProbability = probability || 100;
+  this.repr = {"probability": this.baseProbability, "scale": scale, "voices": voices, "type": "Pattern"};
 
   this._makenote = function(button, color, probability, accented){
     return {
@@ -39,7 +40,9 @@ var Pattern = function(probability, scale, voices){
     };
   };
   this.toJSON = function(){
-    return this.repr;
+    var jsonMe = {notes: this.notes}
+    _.extend(jsonMe, this.repr);
+    return jsonMe;
   };
   this.addnote = function(button, color, probability, accented){
     // Add a note to the pattern
@@ -84,7 +87,7 @@ var Pattern = function(probability, scale, voices){
   this.donotes = function(beat, message, output){
     var ticknotes = this.notes[beat];
     _.each(ticknotes, function(note){
-      var play = true;
+      var play = _.has(this.midiMessages, message);
       var chance = _.random(0, 100);
       if (message == 'note_on' && chance > note.probability){
         play = false
@@ -130,11 +133,36 @@ var ScalePattern = function(probability, key, scale, voices){
   };
 };
 
+var VolcaDrumPattern = function(probability){
+  // Midi notes for the drums on the volca, missing out the toms
+  // midi implemenation http://media.aadl.org/files/catalog_guides/1445131_chart.pdf
+  // http://www.midi.org/techspecs/midimessages.php
+  _.extend(this, new Pattern(
+    probability,
+    [75, 67, 49, 39, 46, 42, 38, 36]
+  ));
+  this.repr.type = 'VolcaDrumPattern';
+  var pattern = this;
+  this.play = function(tick){
+    // gets called in the context of the output from the sequencer event
+    var output = this;
+    // don't need to stop previous notes on the volca, so only send note_on
+    pattern.donotes(tick, 'note_on', output);
+  }
+};
+
 function patternFactory(pattern){
   if (_.isUndefined(pattern)){
     return new Pattern();
   } else if (pattern.type == 'ScalePattern'){
-    return new ScalePattern(pattern.probability, pattern.key, pattern.scale, pattern.voices);
+    return new ScalePattern(
+      pattern.probability,
+      pattern.key,
+      pattern.scale,
+      pattern.voices
+    );
+  } else if (pattern.type == 'VolcaDrumPattern'){
+    return new VolcaDrumPattern(pattern.probability);
   } else {
     return new Pattern(pattern.probability, pattern.scale, pattern.voices);
   };
@@ -142,4 +170,5 @@ function patternFactory(pattern){
 
 exports.Pattern = Pattern;
 exports.ScalePattern = ScalePattern;
+exports.VolcaDrumPattern = VolcaDrumPattern;
 exports.patternFactory = patternFactory;

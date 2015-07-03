@@ -97,8 +97,10 @@ exports.getStepEntry = function(outputs, launchpad, sequencer){
 
   buttons.bank.callbacks.press = function(){
     var bank = banks.next();
-    this.button.light(launchpad.colors[bank].high);
+    console.log(bank, ":", this.layout.outputs[bank].pattern.repr.type);
+
     this.layout.drawGrid(launchpad.colors[bank].high, this.layout.outputs[bank].pattern);
+    this.button.light(launchpad.colors[bank].high);
   };
 
   buttons.shift1.callbacks.press = function(){

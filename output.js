@@ -13,6 +13,7 @@ var Output = function(sequencer, midiPort, midiChannel, pattern, voices){
   this.pattern = pattern;
   _.extend(this, Backbone.Events);
   this.listenTo(sequencer, 'tick', this.pattern.play);
+  // TODO: listen to the sequencers clock and send [248, , ] to sync the clocks
   this.toJSON = function(){
     return {
       "midiChannel": this.midiChannel,

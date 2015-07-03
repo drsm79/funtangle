@@ -10,9 +10,10 @@ var Layout = function(outputs){
   this.init = function(launchpad, buttons, reset){
     this.buttons = buttons || this.buttons;
     this.launchpad = launchpad;
-    this.blinkers = {};
 
-    if (reset){this.launchpad.clear();}
+    if (reset){
+      this.launchpad.clear();
+    }
     _.each(this.buttons, function(button, name){
       this.buttons[name].button = this.launchpad.getButton(
         button.position.x,
@@ -34,6 +35,7 @@ var Layout = function(outputs){
   };
   this.stopBlink = function(button, color){
     this.blinkers = _.omit(this.blinkers, button.toString());
+    // console.log('stopping blink', color);
     button.light(color);
   };
   this.stopAllBlink = function(){
@@ -57,12 +59,9 @@ var Layout = function(outputs){
     }
   };
   this.drawGrid = function(bank, pattern){
+    // console.log('drawGrid');
     // Wipe the area
-    for(var y = 0; y < 8; y++) {
-        for(var x = 0; x < 8; x++) {
-            this.launchpad.getButton(x, y).dark();
-        }
-    };
+    this.clearArea(0, 8, 0, 8);
     _.each(pattern.notes, function(ticknotes) {
       _.each(ticknotes, function(note){
         note.button.light(bank);
@@ -70,6 +69,7 @@ var Layout = function(outputs){
     });
   };
   this.clearArea = function(x1, x2, y1, y2) {
+    // console.log('clearArea');
     for(var y = y1; y < y2; y++) {
       for(var x = x1; x < x2; x++) {
         this.launchpad.getButton(x, y).dark();
@@ -77,6 +77,7 @@ var Layout = function(outputs){
     }
   };
   this.applyToArea = function(fn, x1, x2, y1, y2) {
+    // console.log('applyToArea', x1, y1, x2, y2);
     // Call fn for all buttons in the area (x1, y1), (x2, y2)
     for(var y = y1; y < y2; y++) {
       for(var x = x1; x < x2; x++) {

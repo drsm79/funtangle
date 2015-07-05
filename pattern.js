@@ -72,17 +72,19 @@ var Pattern = function(probability, scale, voices){
     return note.accented ? 120 : 90;
   };
   var pattern = this;
-  this.play = function(tick){
-    // gets called in the context of the output from the sequencer event
-    var output = this;
-    // stop the previous note(s)
-    if (tick > 0){
-        pattern.donotes(tick - 1, 'note_off', output);
-    } else {
-        pattern.donotes(7, 'note_off', output);
+  this.play = function(arg){
+    if (!arg.muted){
+      // gets called in the context of the output from the sequencer event
+      var output = this;
+      // stop the previous note(s)
+      if (arg.position > 0){
+          pattern.donotes(arg.position - 1, 'note_off', output);
+      } else {
+          pattern.donotes(7, 'note_off', output);
+      }
+      // play the current note(s)
+      pattern.donotes(arg.position, 'note_on', output);
     }
-    // play the current note(s)
-    pattern.donotes(tick, 'note_on', output);
   }
   this.donotes = function(beat, message, output){
     var ticknotes = this.notes[beat];

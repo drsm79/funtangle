@@ -42,14 +42,14 @@ if (args._[0] != 'ports'){
   function lightStep(arg){
     var button = arg.button;
     button.listenTo(sequencer, 'tick', function(tick, microtick){
-      // red means skipped
-      // orange means muted
-      var skipOrMute = [
-        button.launchpad.colors.red.high),
-        button.launchpad.colors.orange.high
-      ];
-      if (_.contains(skipOrMute, button.getState()){
-        console.log('step is muted or skipped');
+      // red means skipped, no change to the step lighting
+      // orange means muted, so show the tick in the lights
+      if (_.contains(_.values(button.launchpad.colors.orange), button.getState())){
+        if (_.isEqual(tick, button.x)){
+          button.light(button.launchpad.colors.orange.low);
+        } else {
+          button.light(button.launchpad.colors.orange.high);
+        }
       } else {
         if (_.isEqual(tick, button.x)){
           button.light(button.launchpad.colors.yellow.high);
@@ -119,15 +119,15 @@ if (args._[0] != 'ports'){
     function logStep(arg){
       // {layout: this, button: this.launchpad.getButton(x, y)}
       arg.button.on('press', function(){
-        console.log(arg.button);
-        console.log(arg.layout.buttons.shift1.on);
-        console.log(arg.layout.buttons.shift2.on);
         if (arg.layout.buttons.shift1.on){
-          arg.button.light(arg.button.launchpad.colors.red.high);
-        } else if (arg.layout.buttons.shift1.on){
           arg.button.light(arg.button.launchpad.colors.orange.high);
-        } else{
+          sequencer.mute(arg.button.x);
+        } else if (arg.layout.buttons.shift2.on){
+          arg.button.light(arg.button.launchpad.colors.red.high);
+          sequencer.skip(arg.button.x);
+        } else if (arg.button.getState() != 0){
           arg.button.dark();
+          sequencer.restore(sequencer.skipped, arg.button.x);
         }
       });
     }

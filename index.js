@@ -58,7 +58,7 @@ if (args._[0] != 'ports'){
         } else {
           button.light(button.launchpad.colors.orange.high);
         }
-      } else {
+      } else if (button.launchpad.colors.red.high != button.getState()){
         if (_.isEqual(tick, button.x)){
           button.light(button.launchpad.colors.yellow.high);
         } else {

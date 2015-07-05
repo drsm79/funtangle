@@ -42,10 +42,20 @@ if (args._[0] != 'ports'){
   function lightStep(arg){
     var button = arg.button;
     button.listenTo(sequencer, 'tick', function(tick, microtick){
-      if (_.isEqual(tick, button.x)){
-        button.light(button.launchpad.colors.yellow.high);
+      // red means skipped
+      // orange means muted
+      var skipOrMute = [
+        button.launchpad.colors.red.high),
+        button.launchpad.colors.orange.high
+      ];
+      if (_.contains(skipOrMute, button.getState()){
+        console.log('step is muted or skipped');
       } else {
-        button.dark();
+        if (_.isEqual(tick, button.x)){
+          button.light(button.launchpad.colors.yellow.high);
+        } else {
+          button.dark();
+        }
       }
     });
   }
@@ -105,6 +115,23 @@ if (args._[0] != 'ports'){
     allOff();
     stepentry.applyToArea(lightStep, 0, 8, 8, 9);
     stepentry.applyToArea(addNote, 0, 8, 0, 8);
+
+    function logStep(arg){
+      // {layout: this, button: this.launchpad.getButton(x, y)}
+      arg.button.on('press', function(){
+        console.log(arg.button);
+        console.log(arg.layout.buttons.shift1.on);
+        console.log(arg.layout.buttons.shift2.on);
+        if (arg.layout.buttons.shift1.on){
+          arg.button.light(arg.button.launchpad.colors.red.high);
+        } else if (arg.layout.buttons.shift1.on){
+          arg.button.light(arg.button.launchpad.colors.orange.high);
+        } else{
+          arg.button.dark();
+        }
+      });
+    }
+    stepentry.applyToArea(logStep, 0, 8, 8, 9);
 
     sequencer.listenTo(stepentry, 'play', function(evt){
       console.log('sequencer heard play');

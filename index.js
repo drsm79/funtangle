@@ -41,6 +41,14 @@ if (args._[0] != 'ports'){
 
   function lightStep(arg){
     var button = arg.button;
+    button.listenTo(sequencer, 'seq:stop', function(tick, microtick){
+      if (button.launchpad.colors.yellow.high == button.getState()){
+        button.dark();
+      }
+      if (button.launchpad.colors.orange.low == button.getState()){
+        button.light(button.launchpad.colors.orange.high);
+      }
+    });
     button.listenTo(sequencer, 'tick', function(tick, microtick){
       // red means skipped, no change to the step lighting
       // orange means muted, so show the tick in the lights

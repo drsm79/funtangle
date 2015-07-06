@@ -21,9 +21,9 @@ var Sequencer = function(bpm){
       while (_.contains(that.skipped, tick)){
         tick = that.ticks.next();
       }
-      that.trigger('tick', tick, {
+      that.trigger('tick', {
         'muted': _.contains(that.muted, tick),
-        'position': position
+        'position': tick
       });
     }
   });

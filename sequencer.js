@@ -34,8 +34,8 @@ var Sequencer = function(bpm){
     this.skipped.push(step);
   };
   this.restore = function(step){
-    sequencer.muted = _.without(sequencer.muted, step);
-    sequencer.skipped = _.without(sequencer.skipped, step);
+    this.muted = _.without(this.muted, step);
+    this.skipped = _.without(this.skipped, step);
   };
   this.changeTempo = function(bpm){
     this.tempo = bpm;

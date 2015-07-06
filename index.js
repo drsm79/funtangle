@@ -135,7 +135,7 @@ if (args._[0] != 'ports'){
           sequencer.skip(arg.button.x);
         } else if (arg.button.getState() != 0){
           arg.button.dark();
-          sequencer.restore(sequencer.skipped, arg.button.x);
+          sequencer.restore(arg.button.x);
         }
       });
     }

@@ -145,11 +145,13 @@ var VolcaDrumPattern = function(probability){
   ));
   this.repr.type = 'VolcaDrumPattern';
   var pattern = this;
-  this.play = function(tick){
-    // gets called in the context of the output from the sequencer event
-    var output = this;
-    // don't need to stop previous notes on the volca, so only send note_on
-    pattern.donotes(tick, 'note_on', output);
+  this.play = function(arg){
+    if (!arg.muted){
+      // gets called in the context of the output from the sequencer event
+      var output = this;
+      // don't need to stop previous notes on the volca, so only send note_on
+      pattern.donotes(arg.position, 'note_on', output);
+    }
   }
 };
 

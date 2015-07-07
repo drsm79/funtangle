@@ -23,7 +23,8 @@ var Sequencer = function(bpm){
       }
       that.trigger('tick', {
         'muted': _.contains(that.muted, tick),
-        'position': tick
+        'position': tick,
+        'microtick': microPosition
       });
     }
   });

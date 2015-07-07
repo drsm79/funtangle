@@ -53,13 +53,13 @@ if (args._[0] != 'ports'){
       // red means skipped, no change to the step lighting
       // orange means muted, so show the tick in the lights
       if (_.contains(_.values(button.launchpad.colors.orange), button.getState())){
-        if (_.isEqual(tick, button.x)){
+        if (_.isEqual(tick.position, button.x)){
           button.light(button.launchpad.colors.orange.low);
         } else {
           button.light(button.launchpad.colors.orange.high);
         }
       } else if (button.launchpad.colors.red.high != button.getState()){
-        if (_.isEqual(tick, button.x)){
+        if (_.isEqual(tick.position, button.x)){
           button.light(button.launchpad.colors.yellow.high);
         } else {
           button.dark();

@@ -1,6 +1,14 @@
 # funtangle
 Launchpad node.js thing
 
+## Features
+ * 4 bank midi sequencer - sequence 4 midi devices from your Novation launchpad
+ * Mute step & skip step
+ * Midi clock (sync) and play/stop/continue sent for chaining midi devices
+ * Special case support for Korg Volca Beats and Sample
+ * Scale patterns create pleasant note layouts in all kinds of scales
+ * Easily identify midi devices attached to your machine with `node index.js ports`
+
 ## Install
 
 You will need [node & npm][node] to install and use Funtangle. The intention is

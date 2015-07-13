@@ -78,15 +78,15 @@ var Pattern = function(probability, scale, voices){
       var output = this;
       // stop the previous note(s)
       if (arg.position > 0){
-          pattern.donotes(arg.position - 1, 'note_off', output);
+          pattern.sendmidi(arg.position - 1, 'note_off', output);
       } else {
-          pattern.donotes(7, 'note_off', output);
+          pattern.sendmidi(7, 'note_off', output);
       }
       // play the current note(s)
-      pattern.donotes(arg.position, 'note_on', output);
+      pattern.sendmidi(arg.position, 'note_on', output);
     }
   }
-  this.donotes = function(beat, message, output){
+  this.sendmidi = function(beat, message, output){
     var ticknotes = this.notes[beat];
     _.each(ticknotes, function(note){
       var play = _.has(this.midiMessages, message);
@@ -150,7 +150,7 @@ var VolcaDrumPattern = function(probability){
       // gets called in the context of the output from the sequencer event
       var output = this;
       // don't need to stop previous notes on the volca, so only send note_on
-      pattern.donotes(arg.position, 'note_on', output);
+      pattern.sendmidi(arg.position, 'note_on', output);
     }
   }
 };

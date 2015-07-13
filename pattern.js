@@ -21,14 +21,19 @@ var colors = _.each(_.filter(_.map(require('midi-launchpad').colors, function(co
 var Pattern = function(probability, scale, voices){
   this.voices = voices || 8;
 
-  this.scale = scale || _.range(60, 67);
+  this.scale = scale || _.range(60, 68);
   this.midiMessages = {
     'note_on': 143,
     'note_off': 127
   }
   this.notes = [[], [], [], [], [], [], [], []];
   this.baseProbability = probability || 100;
-  this.repr = {"probability": this.baseProbability, "scale": scale, "voices": voices, "type": "Pattern"};
+  this.repr = {
+    "probability": this.baseProbability,
+    "scale": scale,
+    "voices": voices,
+    "type": "Pattern"
+  };
 
   this._makenote = function(button, color, probability, accented){
     return {
@@ -73,8 +78,8 @@ var Pattern = function(probability, scale, voices){
   };
   var pattern = this;
   this.play = function(arg){
+    // gets called in the context of the output from the sequencer event
     if (!arg.muted){
-      // gets called in the context of the output from the sequencer event
       var output = this;
       // stop the previous note(s)
       if (arg.position > 0){
@@ -155,6 +160,42 @@ var VolcaDrumPattern = function(probability){
   }
 };
 
+var VolcaSamplePattern = function(probability){
+  // The Sample plays the same sample, regardless of note. It uses midi channels
+  // for different notes
+  _.extend(this, new Pattern(probability));
+  this.repr.type = 'VolcaSamplePattern';
+  var pattern = this;
+  this.play = function(arg){
+    if (!arg.muted){
+      // gets called in the context of the output from the sequencer event
+      var output = this;
+      // don't need to stop previous notes on the volca, so only send note_on
+      pattern.sendmidi(arg.position, 'note_on', output);
+    }
+  }
+
+  this.sendmidi = function(beat, message, output){
+    var ticknotes = this.notes[beat];
+    _.each(ticknotes, function(note){
+      var play = _.has(this.midiMessages, message);
+      var chance = _.random(0, 100);
+      if (message == 'note_on' && chance > note.probability){
+        play = false
+      }
+      if (play){
+        var packet = [
+          this.midiMessages[message] + output.midiChannel + (7 - note.button.y),
+          note.midi,
+          this.velocity(note)
+        ];
+        console.log(note.button.y, packet);
+        output.midiOutput.sendMessage(packet);
+      }
+    }, this);
+  };
+};
+
 function patternFactory(pattern){
   if (_.isUndefined(pattern)){
     return new Pattern();
@@ -167,6 +208,8 @@ function patternFactory(pattern){
     );
   } else if (pattern.type == 'VolcaDrumPattern'){
     return new VolcaDrumPattern(pattern.probability);
+  } else if (pattern.type == 'VolcaSamplePattern'){
+    return new VolcaSamplePattern(pattern.probability);
   } else {
     return new Pattern(pattern.probability, pattern.scale, pattern.voices);
   };
@@ -175,4 +218,5 @@ function patternFactory(pattern){
 exports.Pattern = Pattern;
 exports.ScalePattern = ScalePattern;
 exports.VolcaDrumPattern = VolcaDrumPattern;
+exports.VolcaSamplePattern = VolcaSamplePattern;
 exports.patternFactory = patternFactory;

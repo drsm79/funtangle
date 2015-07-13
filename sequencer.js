@@ -15,6 +15,7 @@ var Sequencer = function(bpm){
 
   var that = this;
   this.clock.on('position', function(position){
+    that.trigger('position', {'position': position});
     var microPosition = position % 24;
     if (microPosition === 0){
       var tick = that.ticks.next();

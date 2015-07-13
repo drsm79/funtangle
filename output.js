@@ -16,22 +16,21 @@ var Output = function(sequencer, midiPort, midiChannel, pattern, voices){
   // From http://www.midi.org/techspecs/midimessages.php
   // 11111000 [248] Timing Clock. Sent 24 times per quarter note when synchronization is required (see text).
   this.listenTo(sequencer, 'position', function(){
-    // console.log('sending clock to ' + this.name);
     this.midiOutput.sendMessage([248, 0, 0]);
   });
   // 11111010 [250] Start. Start the current sequence playing. (This message will be followed with Timing Clocks).
   this.listenTo(sequencer, 'seq:play', function(){
-    console.log('sending start to ' + this.name);
     this.midiOutput.sendMessage([250, 0, 0]);
   });
-  // // 11111011 [251] Continue. Continue at the point the sequence was Stopped.
   this.listenTo(sequencer, 'seq:pause', function(){
-    console.log('sending continue to ' + this.name);
+    this.midiOutput.sendMessage([252, 0, 0])
+  });
+  // // 11111011 [251] Continue. Continue at the point the sequence was Stopped.
+  this.listenTo(sequencer, 'seq:continue', function(){
     this.midiOutput.sendMessage([251, 0, 0])
   });
   // // 11111100 [252] Stop. Stop the current sequence.
   this.listenTo(sequencer, 'seq:stop', function(){
-    console.log('sending stop to ' + this.name);
     this.midiOutput.sendMessage([252, 0, 0]);
   });
   // TODO: listen to the sequencers clock and send [248, , ] to sync the clocks

@@ -141,6 +141,10 @@ if (args._[0] != 'ports'){
     }
     stepentry.applyToArea(logStep, 0, 8, 8, 9);
 
+    sequencer.listenTo(stepentry, 'continue', function(evt){
+      console.log('sequencer heard continue');
+      this.continue();
+    });
     sequencer.listenTo(stepentry, 'play', function(evt){
       console.log('sequencer heard play');
       this.play();

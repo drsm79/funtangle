@@ -47,6 +47,10 @@ var Sequencer = function(bpm){
     this.clock.start();
     this.trigger('seq:play');
   };
+  this.continue = function(){
+    this.clock.start();
+    this.trigger('seq:continue');
+  };
   this.pause = function(){
     this.clock.stop();
     this.trigger('seq:pause');

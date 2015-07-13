@@ -52,7 +52,10 @@ exports.getStepEntry = function(outputs, launchpad, sequencer){
     var colors = this.layout.launchpad.colors;
     var pausestate = [colors.green.high, 0]; // flash green when paused
     var paused = _.has(this.layout.blinkers, this.button.toString());
-    if (_.isEqual(this.button.getState(), colors.green.high) || paused){
+    if (paused){
+      this.layout.stopBlink(this.button, colors.orange.high);
+      this.layout.trigger('continue');
+    } else if (_.isEqual(this.button.getState(), colors.green.high)){
       this.layout.stopBlink(this.button, colors.orange.high);
       this.layout.trigger('play');
     } else {

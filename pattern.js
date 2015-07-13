@@ -28,6 +28,20 @@ var Pattern = function(pattern){
   }
   this.repr = _.extend(defaults, pattern);
 
+  if (this.repr.stack){
+    // If a pattern has a stack of other pattern types extend it here, omitting
+    // the stack to avoid recursive death.
+    this.repr.type = [this.repr.type];
+    _.each(this.repr.stack, function(patternType){
+      var stackee = _.omit(this.repr, "stack");
+      var originalType = this.repr.type;
+      stackee.type = patternType;
+      var x = _.extend(this, patternFactory(stackee));
+      this.repr.type = originalType;
+      this.repr.type.push(patternType);
+    }, this);
+  }
+
   this.midiMessages = {
     'note_on': 143,
     'note_off': 127

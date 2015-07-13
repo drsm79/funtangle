@@ -18,27 +18,26 @@ var colors = _.each(_.filter(_.map(require('midi-launchpad').colors, function(co
   }
 })), function(obj){_.extend(this, obj)}, invertedcolors);
 
-var Pattern = function(probability, scale, voices){
-  this.voices = voices || 8;
+var Pattern = function(pattern){
+  var defaults = {
+    voices: 8,
+    scale: _.range(60, 68),
+    probability: 100,
+    type: "Pattern",
+    name: "Pattern"
+  }
+  this.repr = _.extend(defaults, pattern);
 
-  this.scale = scale || _.range(60, 68);
   this.midiMessages = {
     'note_on': 143,
     'note_off': 127
   }
   this.notes = [[], [], [], [], [], [], [], []];
-  this.baseProbability = probability || 100;
-  this.repr = {
-    "probability": this.baseProbability,
-    "scale": scale,
-    "voices": voices,
-    "type": "Pattern"
-  };
 
-  this._makenote = function(button, color, probability, accented){
+  this._makenote = function(button, color, probability, accented, name){
     return {
       button: button,
-      midi: this.scale[button.y],
+      midi: this.repr.scale[button.y],
       accented: accented || false,
       colour: color,
       probability: probability
@@ -49,16 +48,16 @@ var Pattern = function(probability, scale, voices){
     _.extend(jsonMe, this.repr);
     return jsonMe;
   };
-  this.addnote = function(button, color, probability, accented){
+  this.addnote = function(button, color, probability, accented, name){
     // Add a note to the pattern
-    if (button.y < this.scale.length){
+    if (button.y < this.repr.scale.length){
       var note = this._makenote(
         button,
         color,
-        probability * this.baseProbability,
+        probability * this.repr.probability,
         accented
       );
-      if (this.notes[button.x].length == this.voices){
+      if (this.notes[button.x].length == this.repr.voices){
         // Patterns can only have as many notes as voices
         this.dropnote(this.notes[button.x].shift().button);
       }
@@ -111,9 +110,9 @@ var Pattern = function(probability, scale, voices){
   };
 };
 
-function createscale(key, scale){
-  var key = key || "g4";
-  var scale = teoria.note(key).scale(scale || "dorian").notes();
+function createscale(pattern){
+  var key = pattern.key || "g4";
+  var scale = teoria.note(key).scale(pattern.scale || "dorian").notes();
   // TODO: repeat this to make 8 note scales?
   scale.push(scale[0].interval('P8'));
   // Keeping 'natural' numbering of keypads means reversing the scale so
@@ -123,16 +122,18 @@ function createscale(key, scale){
 }
 
 
-var ScalePattern = function(probability, key, scale, voices){
-  _.extend(this, new Pattern(probability, scale, voices));
-  this.scale = createscale(key, scale);
-  this.repr.key = key;
-  this.repr.type = 'ScalePattern';
+var ScalePattern = function(pattern){
+  var defaults = {name: 'ScalePattern', type: 'ScalePattern'};
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern))
+  );
+  this.repr.scale = createscale(this.repr);
   this._makenote = function(button, color, probability, accented){
     // Add a note to the pattern
     return {
       button: button,
-      midi: this.scale[button.y].midi(),
+      midi: this.repr.scale[button.y].midi(),
       accented: accented || false,
       colour: color,
       probability: probability
@@ -140,15 +141,19 @@ var ScalePattern = function(probability, key, scale, voices){
   };
 };
 
-var VolcaDrumPattern = function(probability){
+var VolcaDrumPattern = function(pattern){
   // Midi notes for the drums on the volca, missing out the toms
   // midi implemenation http://media.aadl.org/files/catalog_guides/1445131_chart.pdf
   // http://www.midi.org/techspecs/midimessages.php
-  _.extend(this, new Pattern(
-    probability,
-    [75, 67, 49, 39, 46, 42, 38, 36]
-  ));
-  this.repr.type = 'VolcaDrumPattern';
+  var defaults = {
+    name: 'VolcaDrumPattern',
+    type: 'VolcaDrumPattern',
+    scale:[75, 67, 49, 39, 46, 42, 38, 36]
+  }
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern))
+  );
   var pattern = this;
   this.play = function(arg){
     if (!arg.muted){
@@ -160,11 +165,14 @@ var VolcaDrumPattern = function(probability){
   }
 };
 
-var VolcaSamplePattern = function(probability){
+var VolcaSamplePattern = function(pattern){
   // The Sample plays the same sample, regardless of note. It uses midi channels
   // for different notes
-  _.extend(this, new Pattern(probability));
-  this.repr.type = 'VolcaSamplePattern';
+  var defaults = {name: 'VolcaSamplePattern', type: 'VolcaSamplePattern'};
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern))
+  );
   var pattern = this;
   this.play = function(arg){
     if (!arg.muted){
@@ -189,7 +197,6 @@ var VolcaSamplePattern = function(probability){
           note.midi,
           this.velocity(note)
         ];
-        console.log(note.button.y, packet);
         output.midiOutput.sendMessage(packet);
       }
     }, this);
@@ -198,20 +205,15 @@ var VolcaSamplePattern = function(probability){
 
 function patternFactory(pattern){
   if (_.isUndefined(pattern)){
-    return new Pattern();
+    return new Pattern({});
   } else if (pattern.type == 'ScalePattern'){
-    return new ScalePattern(
-      pattern.probability,
-      pattern.key,
-      pattern.scale,
-      pattern.voices
-    );
+    return new ScalePattern(pattern);
   } else if (pattern.type == 'VolcaDrumPattern'){
-    return new VolcaDrumPattern(pattern.probability);
+    return new VolcaDrumPattern(pattern);
   } else if (pattern.type == 'VolcaSamplePattern'){
-    return new VolcaSamplePattern(pattern.probability);
+    return new VolcaSamplePattern(pattern);
   } else {
-    return new Pattern(pattern.probability, pattern.scale, pattern.voices);
+    return new Pattern(pattern);
   };
 };
 

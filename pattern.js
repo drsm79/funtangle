@@ -367,14 +367,14 @@ function patternFactory(pattern){
     return new ChordPattern(pattern);
   } else if (pattern.type == 'PingPongPattern'){
     return new PingPongPattern(pattern);
+  } else if (pattern.type == 'LockingPattern'){
+    return new LockingPattern(pattern);
   } else if (pattern.type == 'VolcaDrumPattern'){
     return new VolcaDrumPattern(pattern);
   } else if (pattern.type == 'VolcaSamplePattern'){
     return new VolcaSamplePattern(pattern);
   } else if (pattern.type == 'TestPattern'){
     return new TestPattern(pattern);
-  } else if (pattern.type == 'LockingPattern'){
-    return new LockingPattern(pattern);
   } else {
     return new Pattern(pattern);
   };
@@ -382,8 +382,10 @@ function patternFactory(pattern){
 
 exports.Pattern = Pattern;
 exports.ScalePattern = ScalePattern;
+exports.ChordPattern = ChordPattern;
+exports.PingPongPattern = PingPongPattern;
+exports.LockingPattern = LockingPattern;
 exports.VolcaDrumPattern = VolcaDrumPattern;
 exports.VolcaSamplePattern = VolcaSamplePattern;
-exports.PingPongPattern = PingPongPattern;
 exports.TestPattern = TestPattern;
 exports.patternFactory = patternFactory;

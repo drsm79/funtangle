@@ -26,7 +26,24 @@ var Pattern = function(pattern){
     type: "Pattern",
     name: "Pattern"
   }
-  this.repr = _.extend(defaults, pattern);
+  this.repr = _.extend(defaults, pattern || {});
+  this.stackMe = function(){
+    if (this.repr.stack){
+      // If a pattern has a stack of other pattern types extend it here, omitting
+      // the stack to avoid recursive death.
+      _.each(this.repr.stack, function(patternType){
+        var stackee = _.omit(this.repr, "stack");
+        // the type becomes a list
+        var originalType = _.flatten([this.repr.type]);
+        stackee.type = patternType;
+
+        var x = _.extend(this, patternFactory(stackee));
+
+        this.repr.type = originalType;
+        this.repr.type.push(patternType);
+      }, this);
+    }
+  };
 
   this.midiMessages = {
     'note_on': 143,
@@ -108,6 +125,8 @@ var Pattern = function(pattern){
       }
     }, this);
   };
+  // Now that everything is initialised, deal with the stacking
+  this.stackMe();
 };
 
 function createscale(pattern){
@@ -203,6 +222,20 @@ var VolcaSamplePattern = function(pattern){
   };
 };
 
+var TestPattern = function(pattern){
+  var defaults = {name: 'TestPattern', type: 'TestPattern', foo: 'bar'};
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern || {}))
+  );
+
+  this._makenote = 'test pattern makes a note, and loves life';
+
+  this.play = function(arg){
+    return 'test pattern plays';
+  };
+};
+
 function patternFactory(pattern){
   if (_.isUndefined(pattern)){
     return new Pattern({});
@@ -212,6 +245,8 @@ function patternFactory(pattern){
     return new VolcaDrumPattern(pattern);
   } else if (pattern.type == 'VolcaSamplePattern'){
     return new VolcaSamplePattern(pattern);
+  } else if (pattern.type == 'TestPattern'){
+    return new TestPattern(pattern);
   } else {
     return new Pattern(pattern);
   };
@@ -221,4 +256,5 @@ exports.Pattern = Pattern;
 exports.ScalePattern = ScalePattern;
 exports.VolcaDrumPattern = VolcaDrumPattern;
 exports.VolcaSamplePattern = VolcaSamplePattern;
+exports.TestPattern = TestPattern;
 exports.patternFactory = patternFactory;

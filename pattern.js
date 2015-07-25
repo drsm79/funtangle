@@ -148,7 +148,7 @@ var PingPongPattern = function(pattern){
     new Pattern(_.extend(defaults, pattern))
   );
   var pattern = this;
-  var normalPlay = this.play
+  var normalPlay = this.play;
   this.play = function(arg){
     var output = this;
     var p = _.bind(normalPlay, output);
@@ -177,6 +177,72 @@ var ScalePattern = function(pattern){
       colour: color,
       probability: probability
     };
+  };
+};
+
+var ChordPattern = function(pattern){
+  var defaults = {name: 'ChordPattern', type: 'ChordPattern'};
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern))
+  );
+  this.repr.chords = this.repr.chords.reverse();
+  this._makenote = function(button, color, probability, accented){
+    // Add a chord to the pattern
+    if (button.y <= this.repr.chords.length){
+      var chord = teoria.chord(
+        this.repr.chords[button.y].chord,
+        this.repr.chords[button.y].octave
+      )
+      console.log(chord.name);
+      var notes = _.map(
+        chord.notes(),
+        function(note){return note.midi()}
+      );
+      return {
+        button: button,
+        chord: chord,
+        midi: notes,
+        accented: accented || false,
+        colour: color,
+        probability: probability
+      };
+    }
+  };
+  var pattern = this;
+  this.play = function(arg){
+    // gets called in the context of the output from the sequencer event
+    if (!arg.muted){
+      var output = this;
+      // stop the previous note(s)
+      if (arg.position > 0){
+          pattern.sendmidi(arg.position - 1, 'note_off', output);
+      } else {
+          pattern.sendmidi(7, 'note_off', output);
+      }
+      // play the current note(s)
+      pattern.sendmidi(arg.position, 'note_on', output);
+    }
+  };
+  this.sendmidi = function(beat, message, output){
+    var ticknotes = this.notes[beat];
+    _.each(ticknotes, function(note, idx, list){
+      var play = _.has(this.midiMessages, message);
+      var chance = _.random(0, 100);
+      if (message == 'note_on' && chance > note.probability){
+        play = false
+      }
+      if (play){
+        _.each(note.midi, function(note){
+          var packet = [
+            this.midiMessages[message] + output.midiChannel,
+            note,
+            this.velocity(note)
+          ];
+          output.midiOutput.sendMessage(packet);
+        }, this);
+      }
+    }, this);
   };
 };
 
@@ -286,6 +352,8 @@ function patternFactory(pattern){
     return new Pattern({});
   } else if (pattern.type == 'ScalePattern'){
     return new ScalePattern(pattern);
+  } else if (pattern.type == 'ChordPattern'){
+    return new ChordPattern(pattern);
   } else if (pattern.type == 'PingPongPattern'){
     return new PingPongPattern(pattern);
   } else if (pattern.type == 'VolcaDrumPattern'){

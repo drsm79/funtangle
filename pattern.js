@@ -140,6 +140,25 @@ function createscale(pattern){
   return scale;
 }
 
+var PingPongPattern = function(pattern){
+  var defaults = {name: 'PingPongPattern', type: 'PingPongPattern'};
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern))
+  );
+  var pattern = this;
+  var normalPlay = this.play
+  this.play = function(arg){
+    var output = this;
+    var p = _.bind(normalPlay, output);
+    p(arg);
+    if (arg.position == 7){
+      pattern.notes.reverse();
+      console.log('flipped');
+      // TODO: fire a render event here - to be caught by the layout
+    }
+  }
+};
 
 var ScalePattern = function(pattern){
   var defaults = {name: 'ScalePattern', type: 'ScalePattern'};
@@ -241,6 +260,8 @@ function patternFactory(pattern){
     return new Pattern({});
   } else if (pattern.type == 'ScalePattern'){
     return new ScalePattern(pattern);
+  } else if (pattern.type == 'PingPongPattern'){
+    return new PingPongPattern(pattern);
   } else if (pattern.type == 'VolcaDrumPattern'){
     return new VolcaDrumPattern(pattern);
   } else if (pattern.type == 'VolcaSamplePattern'){
@@ -256,5 +277,6 @@ exports.Pattern = Pattern;
 exports.ScalePattern = ScalePattern;
 exports.VolcaDrumPattern = VolcaDrumPattern;
 exports.VolcaSamplePattern = VolcaSamplePattern;
+exports.PingPongPattern = PingPongPattern;
 exports.TestPattern = TestPattern;
 exports.patternFactory = patternFactory;

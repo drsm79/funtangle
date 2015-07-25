@@ -7,6 +7,10 @@ Launchpad node.js thing
  * Midi clock (sync) and play/stop/continue sent for chaining midi devices
  * Special case support for Korg Volca Beats and Sample
  * Scale patterns create pleasant note layouts in all kinds of scales
+ * Chord patterns hold chord progressions, specified by teoria name/octave,
+   list of named notes or list of midi note numbers
+ * Ping pong patterns reverse when you get to the end of the sequence
+ * Locking patterns wait until there's a new note before sending `midi_off`
  * Easily identify midi devices attached to your machine with `node index.js ports`
 
 ## Install

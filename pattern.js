@@ -4,6 +4,7 @@
 
 var teoria = require('teoria');
 var _ = require('underscore');
+var utils = require('./utils');
 
 var probabilities = {
   'low': 0.5,
@@ -255,6 +256,31 @@ var TestPattern = function(pattern){
   };
 };
 
+var LockingPattern = function(pattern){
+  var defaults = {name: 'LockingPattern', type: 'LockingPattern', foo: 'bar'};
+  _.extend(
+    this,
+    new Pattern(_.extend(defaults, pattern || {}))
+  );
+  this.playing = -1;
+  var pattern = this;
+
+  this.play = function(arg){
+    // gets called in the context of the output from the sequencer event
+    if (!arg.muted){
+      var output = this;
+      if (pattern.notes[arg.position].length > 0 && pattern.playing >= 0){
+        pattern.sendmidi(pattern.playing, 'note_off', output);
+      }
+      if (pattern.notes[arg.position].length > 0){
+        pattern.playing = arg.position;
+        // play the current note(s)
+        pattern.sendmidi(arg.position, 'note_on', output);
+      }
+    }
+  };
+};
+
 function patternFactory(pattern){
   if (_.isUndefined(pattern)){
     return new Pattern({});
@@ -268,6 +294,8 @@ function patternFactory(pattern){
     return new VolcaSamplePattern(pattern);
   } else if (pattern.type == 'TestPattern'){
     return new TestPattern(pattern);
+  } else if (pattern.type == 'LockingPattern'){
+    return new LockingPattern(pattern);
   } else {
     return new Pattern(pattern);
   };

@@ -190,15 +190,26 @@ var ChordPattern = function(pattern){
   this._makenote = function(button, color, probability, accented){
     // Add a chord to the pattern
     if (button.y <= this.repr.chords.length){
-      var chord = teoria.chord(
-        this.repr.chords[button.y].chord,
-        this.repr.chords[button.y].octave
-      )
-      console.log(chord.name);
-      var notes = _.map(
-        chord.notes(),
-        function(note){return note.midi()}
-      );
+      var notes = [];
+      if(this.repr.chords[button.y].chord){
+        var chord = teoria.chord(
+          this.repr.chords[button.y].chord,
+          this.repr.chords[button.y].octave
+        )
+        notes = _.map(
+          chord.notes(),
+          function(note){return note.midi()}
+        );
+      } else if (this.repr.chords[button.y].notes){
+        notes = _.map(
+          this.repr.chords[button.y].notes,
+          function(name){
+            return teoria.note(name).midi()
+          }
+        );
+      } else if (this.repr.chords[button.y].midi){
+        notes = this.repr.chords[button.y].midi;
+      }
       return {
         button: button,
         chord: chord,

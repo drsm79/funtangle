@@ -101,7 +101,7 @@ exports.getStepEntry = function(outputs, launchpad, sequencer){
   buttons.bank.callbacks.press = function(){
     var bank = banks.next();
     var pattern = this.layout.outputs[bank].pattern;
-    console.log(bank, ":", pattern.repr.name, _.omit(pattern.repr, "name"));
+    console.log(bank, ":", pattern.repr.name);
 
     this.layout.drawGrid(launchpad.colors[bank].high, this.layout.outputs[bank].pattern);
     this.button.light(launchpad.colors[bank].high);

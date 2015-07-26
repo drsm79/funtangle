@@ -168,6 +168,7 @@ var ScalePattern = function(pattern){
     new Pattern(_.extend(defaults, pattern))
   );
   this.repr.scale = createscale(this.repr);
+  console.log(this.repr.scale.toString());
   this._makenote = function(button, color, probability, accented){
     // Add a note to the pattern
     return {

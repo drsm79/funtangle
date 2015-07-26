@@ -51,7 +51,6 @@ var Launchpad = function(outPort, inPort, banks){
         if (this.callbacks[shift][button.toString()]){
             this.callbacks[shift][button.toString()](button);
         } else {
-            console.log(button.toString());
             this.callbacks[shift]['catchall'](button);
         }
     });

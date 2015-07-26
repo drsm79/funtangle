@@ -138,7 +138,7 @@ function createscale(pattern){
   // Keeping 'natural' numbering of keypads means reversing the scale so
   // highest note is highest pad
   scale.reverse();
-  return scale;
+  return _.last(scale, 8);
 }
 
 var PingPongPattern = function(pattern){
